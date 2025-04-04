@@ -2,7 +2,7 @@
 
 [![Cursor Version](https://img.shields.io/badge/Cursor-v0.47.8-blue)](https://cursor.sh)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ver0/cursor-rules/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/mitas/cursor-rules/pulls)
 
 A carefully crafted collection of rules that optimize your Cursor AI experience. These rules enforce consistent practices, improve AI assistance quality, and streamline common development workflows.
 
@@ -14,7 +14,7 @@ The `apply-rules.sh` script allows you to download rules directly to your projec
 
 ```bash
 # Download the script
-curl -o apply-rules.sh https://raw.githubusercontent.com/ver0-project/cursor-rules/master/apply-rules.sh && chmod +x apply-rules.sh
+curl -o apply-rules.sh https://raw.githubusercontent.com/mitas/cursor-rules/master/apply-rules.sh && chmod +x apply-rules.sh
 
 # Basic usage - download rules to target directory
 ./apply-rules.sh /path/to/your/project
@@ -59,21 +59,33 @@ Rules are organized in specific directories:
 
 #### Core Rules
 
+- `clean-code.mdc` - Guidelines for writing clean, maintainable code
 - `coding-principles.mdc` - Guidelines for writing high-quality, maintainable code
 - `cursor-rules.mdc` - Guidelines for creating and updating Cursor rules
 - `emoji-usage.mdc` - Best practices for using emojis in AI responses
+- `gitflow.mdc` - Git workflow standards and branching strategies
 
 #### Tools Rules
 
 - `commit-message.mdc` - Guidelines for semantic git commit messages
-- `git.mdc` - Settings for proper git output display without pager
-- `unix-directory-listing.mdc` - Standards for directory listings on Unix/Linux/macOS
-- `windows-directory-listing.mdc` - Standards for directory listings on Windows
+- `directory-listing.mdc` - Standards for directory listings
+- `git.mdc` - Settings for proper git output display
 
 #### Language-Specific Rules
 
+- `lng/cpp/cpp.mdc` - C++ coding standards and best practices
+- `lng/css/tailwind.mdc` - Tailwind CSS usage guidelines
 - `lng/markdown/formatting.mdc` - Guidelines for consistent Markdown formatting
-- `lng/markdown/readme-formatting.mdc` - Best practices for README.md files
+- `lng/node/node-express.mdc` - Node.js and Express framework best practices
+- `lng/php/phpunit-test.mdc` - PHP unit testing with PHPUnit
+- `lng/python/fastapi.mdc` - FastAPI framework usage guidelines
+- `lng/python/python.mdc` - Python coding standards and best practices
+- `lng/react/nextjs.mdc` - Next.js framework usage guidelines
+- `lng/react/react.mdc` - React.js best practices
+- `lng/sql/database.mdc` - SQL and database management guidelines
+- `lng/svelte/svelte.mdc` - Svelte framework usage guidelines
+- `lng/typescript/typescript.mdc` - TypeScript coding standards
+- `lng/vue/vue.mdc` - Vue.js framework best practices
 
 ## ⚙️ Configuration
 

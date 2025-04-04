@@ -41,11 +41,11 @@ if [ -z "$TARGET_DIR" ]; then
 fi
 
 echo -e "${GRAY}====${RESET}"
-echo -e "${GRAY}Repository: https://github.com/ver0-project/cursor-rules${RESET}"
+echo -e "${GRAY}Repository: https://github.com/mitas/cursor-rules${RESET}"
 echo -e "${GRAY}====${RESET}\n"
 
 RULES_DIR="$TARGET_DIR/.cursor/rules"
-RAW_URL="https://raw.githubusercontent.com/ver0-project/cursor-rules/refs/heads/master/.cursor/rules"
+RAW_URL="https://raw.githubusercontent.com/mitas/cursor-rules/refs/heads/master/.cursor/rules"
 
 # Check for required commands
 for cmd in curl mkdir; do
@@ -110,19 +110,31 @@ download_rules() {
     
     RULES=(
         # Core rules
+        "core/clean-code.mdc"
         "core/coding-principles.mdc"
         "core/cursor-rules.mdc"
         "core/emoji-usage.mdc"
+        "core/gitflow.mdc"
         
-        # Lng rules
+        # Language-specific rules
+        "lng/cpp/cpp.mdc"
+        "lng/css/tailwind.mdc"
         "lng/markdown/formatting.mdc"
-        "lng/markdown/readme-formatting.mdc"
+        "lng/node/node-express.mdc"
+        "lng/php/phpunit-test.mdc"
+        "lng/python/fastapi.mdc"
+        "lng/python/python.mdc"
+        "lng/react/nextjs.mdc"
+        "lng/react/react.mdc"
+        "lng/sql/database.mdc"
+        "lng/svelte/svelte.mdc"
+        "lng/typescript/typescript.mdc"
+        "lng/vue/vue.mdc"
         
         # Tools rules
         "tools/commit-message.mdc"
+        "tools/directory-listing.mdc"
         "tools/git.mdc"
-        "tools/unix-directory-listing.mdc"
-        "tools/windows-directory-listing.mdc"
         
         # Local rules would be added here if any exist
     )
