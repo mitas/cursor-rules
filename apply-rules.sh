@@ -45,7 +45,7 @@ echo -e "${GRAY}Repository: https://github.com/mitas/cursor-rules${RESET}"
 echo -e "${GRAY}====${RESET}\n"
 
 RULES_DIR="$TARGET_DIR/.cursor/rules"
-RAW_URL="https://raw.githubusercontent.com/mitas/cursor-rules/refs/heads/master/.cursor/rules"
+RAW_URL="https://raw.githubusercontent.com/mitas/cursor-rules/master/.cursor/rules"
 
 # Check for required commands
 for cmd in curl mkdir; do
