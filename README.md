@@ -75,6 +75,7 @@ Rules are organized in specific directories:
 
 - `lng/cpp/cpp.mdc` - C++ coding standards and best practices
 - `lng/css/tailwind.mdc` - Tailwind CSS usage guidelines
+- `lng/golang/golang.mdc` - Go (Golang) coding standards and best practices
 - `lng/markdown/formatting.mdc` - Guidelines for consistent Markdown formatting
 - `lng/node/node-express.mdc` - Node.js and Express framework best practices
 - `lng/php/phpunit-test.mdc` - PHP unit testing with PHPUnit

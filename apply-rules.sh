@@ -119,6 +119,7 @@ download_rules() {
         # Language-specific rules
         "lng/cpp/cpp.mdc"
         "lng/css/tailwind.mdc"
+        "lng/golang/golang.mdc"
         "lng/markdown/formatting.mdc"
         "lng/node/node-express.mdc"
         "lng/php/phpunit-test.mdc"
