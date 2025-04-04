@@ -13,6 +13,10 @@ alwaysApply: false
 - Applies to all Markdown document creation and editing.
 - Enables better documentation and knowledge sharing.
 - Creates consistent experience across different Markdown renderers.
+- A well-formatted document is the first impression of your repository.
+- Good documentation encourages adoption and collaboration.
+- Following best practices improves discoverability and usability.
+- Visual elements enhance engagement and comprehension.
 
 ## Critical rules
 
@@ -33,11 +37,38 @@ alwaysApply: false
 - Use proper heading capitalization (title case for h1-h2, sentence case for h3-h4).
 - Add a space after list markers (- or numbers) for consistent rendering.
 - Use consistent emphasis formatting (either \* or \_ for italics/bold, not mixed).
+- Use concise, scannable paragraphs with 3-5 sentences maximum.
+- Incorporate visual elements strategically:
+  - Screenshots of the application in use
+  - Diagrams explaining architecture or workflows
+  - Logo at the top when available
+- Add relevant badges at the top (build status, version, license, etc.) for README files.
+- Provide working examples that demonstrate real-world usage.
+- Maintain a friendly, encouraging tone throughout.
+- Close with clear next steps or call-to-action.
+- Keep the entire document scannable within 2-3 minutes.
+- Include requirements and dependencies section in README files.
+- Add a troubleshooting or FAQ section for common issues when applicable.
+- Provide links to additional documentation when available.
+
+## Essential README Sections
+
+For README.md files, include these essential sections:
+- Project title and description
+- Installation instructions
+- Usage examples
+- Features list
+- Contributing guidelines
+- License information
 
 ## Examples
 
 <example type="valid">
 # Document Title
+
+[![Build Status](https://img.shields.io/travis/username/repo.svg)](https://travis-ci.org/username/repo)
+[![Version](https://img.shields.io/npm/v/project.svg)](https://www.npmjs.com/package/project)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Section Heading
 
@@ -85,6 +116,23 @@ sequenceDiagram
   B->>A: Return response
 ```
 
+## Features
+
+- **Fast Processing**: Handles large datasets efficiently
+- **Easy Integration**: Works with existing toolchains
+- **Flexible Configuration**: Customize to your specific needs
+
+## Documentation
+
+For detailed documentation, see [docs/README.md](docs/README.md).
+
+## Contributing
+
+Contributions welcome! Please check out our [contributing guidelines](CONTRIBUTING.md).
+
+## License
+
+MIT © [Your Name]
 </example>
 
 <example type="invalid">
@@ -119,4 +167,21 @@ sequenceDiagram
   B->>A: Return response
 ```
 
+# My Project
+
+This is a project I made. It does stuff.
+
+To install:
+Download and run the file.
+
+Usage:
+Just use it like any other tool.
+
+You might have problems if you don't set it up right.
+
+I might add more features later.
+
+If you want to contribute just send me code.
+
+License: free
 </example>
