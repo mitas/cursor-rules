@@ -59,41 +59,42 @@ Rules are organized in specific directories:
 
 #### Core Rules
 
-- `clean-code.mdc` - Guidelines for writing clean, maintainable code
-- `coding-principles.mdc` - Guidelines for writing high-quality, maintainable code
-- `cursor-rules.mdc` - Guidelines for creating and updating Cursor rules
-- `emoji-usage.mdc` - Best practices for using emojis in AI responses
-- `gitflow.mdc` - Git workflow standards and branching strategies
+- `core/clean-code.mdc` - Code Quality Guidelines
+- `core/coding-principles.mdc` - Code Quality Principles
+- `core/cursor-rules.mdc` - Cursor Rules Format
+- `core/emoji-usage.mdc` - Emoji Usage Guidelines
+- `core/gitflow.mdc` - Gitflow Workflow Rules
 
 #### Tools Rules
 
-- `commit-message.mdc` - Guidelines for semantic git commit messages
-- `directory-listing.mdc` - Standards for directory listings
-- `git.mdc` - Settings for proper git output display
+- `tools/commit-message.mdc` - Semantic Commit Messages
+- `tools/directory-listing.mdc` - Directory Listing Guidelines
+- `tools/git.mdc` - Git Command Usage
 
 #### Language-Specific Rules
 
-- `lang/cpp/cpp.mdc` - C++ coding standards and best practices
-- `lang/css/tailwind.mdc` - Tailwind CSS usage guidelines
-- `lang/golang/golang.mdc` - Go (Golang) coding standards and best practices
-- `lang/golang/golang-project-structure.mdc` - Go project structure and organization guidelines
-- `lang/markdown/formatting.mdc` - Guidelines for consistent Markdown formatting
-- `lang/node/node-express.mdc` - Node.js and Express framework best practices
-- `lang/php/php.mdc` - PHP coding standards and best practices
-- `lang/php/php-7.4.mdc` - PHP 7.4 features and best practices
-- `lang/php/php-8.0.mdc` - PHP 8.0 features and best practices
-- `lang/php/php-8.1.mdc` - PHP 8.1 features and best practices
-- `lang/php/php-8.2.mdc` - PHP 8.2 features and best practices
-- `lang/php/php-8.3.mdc` - PHP 8.3 features and best practices
-- `lang/php/phpunit-test.mdc` - PHP unit testing with PHPUnit
-- `lang/python/fastapi.mdc` - FastAPI framework usage guidelines
-- `lang/python/python.mdc` - Python coding standards and best practices
-- `lang/react/nextjs.mdc` - Next.js framework usage guidelines
-- `lang/react/react.mdc` - React.js best practices
-- `lang/sql/database.mdc` - SQL and database management guidelines
-- `lang/svelte/svelte.mdc` - Svelte framework usage guidelines
-- `lang/typescript/typescript.mdc` - TypeScript coding standards
-- `lang/vue/vue.mdc` - Vue.js framework best practices
+- `lang/cpp/cpp.mdc` - C++ Programming Guidelines
+- `lang/css/tailwind.mdc` - Tailwind CSS Best Practices
+- `lang/golang/golang.mdc` - Go (Golang) Coding Standards
+- `lang/golang/golang-project-structure.mdc` - Go Project Structure Best Practices
+- `lang/markdown/formatting.mdc` - Markdown Formatting Standards
+- `lang/node/node-express.mdc` - Node.js and Express.js Best Practices
+- `lang/php/php.mdc` - PHP Coding Standards and Best Practices
+- `lang/php/php-7.4.mdc` - PHP 7.4 Features and Best Practices
+- `lang/php/php-8.0.mdc` - PHP 8.0 Features and Best Practices
+- `lang/php/php-8.1.mdc` - PHP 8.1 Features and Best Practices
+- `lang/php/php-8.2.mdc` - PHP 8.2 Features and Best Practices
+- `lang/php/php-8.3.mdc` - PHP 8.3 Features and Best Practices
+- `lang/php/phpunit-test.mdc` - PHPUnit Testing Best Practices
+- `lang/python/fastapi.mdc` - FastAPI Best Practices
+- `lang/python/python.mdc` - Python Best Practices
+- `lang/react/nextjs.mdc` - Next.js Best Practices
+- `lang/react/react.mdc` - React Best Practices
+- `lang/sql/database.mdc` - Database Best Practices
+- `lang/svelte/svelte.mdc` - Svelte Best Practices
+- `lang/typescript/typescript.mdc` - TypeScript Best Practices
+- `lang/vue/vue.mdc` - Vue.js Best Practices
+
 
 ## ⚙️ Configuration
 
