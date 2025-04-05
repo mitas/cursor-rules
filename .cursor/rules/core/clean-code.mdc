@@ -1,5 +1,5 @@
 ---
-description: Comprehensive guidelines for writing clean, maintainable, and human-readable code. Apply these rules when writing or reviewing code to ensure consistency and quality.
+description: "Follow this rule when writing or reviewing code to ensure clean, maintainable, and human-readable code that meets the project's quality standards"
 globs: 
 ---
 # Code Quality Guidelines

@@ -53,7 +53,7 @@ Rules are organized in specific directories:
 | `overview/` | Project overviews and descriptions              |
 | `testing/`  | Testing approach guidelines                     |
 | `tools/`    | OS-specific utilities and common tools          |
-| `lng/`      | Language-specific rules in subdirectories       |
+| `lang/`      | Language-specific rules in subdirectories       |
 
 ### Available Rules
 
@@ -73,20 +73,27 @@ Rules are organized in specific directories:
 
 #### Language-Specific Rules
 
-- `lng/cpp/cpp.mdc` - C++ coding standards and best practices
-- `lng/css/tailwind.mdc` - Tailwind CSS usage guidelines
-- `lng/golang/golang.mdc` - Go (Golang) coding standards and best practices
-- `lng/markdown/formatting.mdc` - Guidelines for consistent Markdown formatting
-- `lng/node/node-express.mdc` - Node.js and Express framework best practices
-- `lng/php/phpunit-test.mdc` - PHP unit testing with PHPUnit
-- `lng/python/fastapi.mdc` - FastAPI framework usage guidelines
-- `lng/python/python.mdc` - Python coding standards and best practices
-- `lng/react/nextjs.mdc` - Next.js framework usage guidelines
-- `lng/react/react.mdc` - React.js best practices
-- `lng/sql/database.mdc` - SQL and database management guidelines
-- `lng/svelte/svelte.mdc` - Svelte framework usage guidelines
-- `lng/typescript/typescript.mdc` - TypeScript coding standards
-- `lng/vue/vue.mdc` - Vue.js framework best practices
+- `lang/cpp/cpp.mdc` - C++ coding standards and best practices
+- `lang/css/tailwind.mdc` - Tailwind CSS usage guidelines
+- `lang/golang/golang.mdc` - Go (Golang) coding standards and best practices
+- `lang/golang/golang-project-structure.mdc` - Go project structure and organization guidelines
+- `lang/markdown/formatting.mdc` - Guidelines for consistent Markdown formatting
+- `lang/node/node-express.mdc` - Node.js and Express framework best practices
+- `lang/php/php.mdc` - PHP coding standards and best practices
+- `lang/php/php-7.4.mdc` - PHP 7.4 features and best practices
+- `lang/php/php-8.0.mdc` - PHP 8.0 features and best practices
+- `lang/php/php-8.1.mdc` - PHP 8.1 features and best practices
+- `lang/php/php-8.2.mdc` - PHP 8.2 features and best practices
+- `lang/php/php-8.3.mdc` - PHP 8.3 features and best practices
+- `lang/php/phpunit-test.mdc` - PHP unit testing with PHPUnit
+- `lang/python/fastapi.mdc` - FastAPI framework usage guidelines
+- `lang/python/python.mdc` - Python coding standards and best practices
+- `lang/react/nextjs.mdc` - Next.js framework usage guidelines
+- `lang/react/react.mdc` - React.js best practices
+- `lang/sql/database.mdc` - SQL and database management guidelines
+- `lang/svelte/svelte.mdc` - Svelte framework usage guidelines
+- `lang/typescript/typescript.mdc` - TypeScript coding standards
+- `lang/vue/vue.mdc` - Vue.js framework best practices
 
 ## ⚙️ Configuration
 
