@@ -1,0 +1,301 @@
+---
+description: "Follow this rule when working with PHP 8.0 to properly implement named arguments, union types, match expressions, attributes, and other features introduced in PHP 8.0"
+globs: **/*.php
+parent_file: php.mdc
+---
+
+# PHP 8.0 Features and Best Practices
+
+## Overview
+
+PHP 8.0 represents a major leap forward with significant new features, performance improvements, and better type safety. This document outlines the key features introduced in PHP 8.0 and how to effectively use them in your code.
+
+## Key Language Features
+
+### Named Arguments
+
+Named arguments allow you to pass values to a function by specifying the parameter name, making function calls more readable and maintainable.
+
+```php
+// Without named arguments
+htmlspecialchars($string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false);
+
+// With named arguments
+htmlspecialchars(
+    string: $string,
+    flags: ENT_QUOTES | ENT_SUBSTITUTE,
+    encoding: 'UTF-8',
+    double_encode: false
+);
+```
+
+**Best Practices:**
+- Use named arguments for functions with numerous or optional parameters
+- Especially useful for parameters that have default values
+- Improves code readability when calling functions with boolean flags
+- Allows skipping optional parameters in the middle of the parameter list
+- Consider parameter names as part of your public API when designing functions
+
+### Union Types
+
+Union types allow a parameter or return value to be of multiple different types.
+
+```php
+function process(string|int $id): int|float {
+    if (is_string($id)) {
+        return (int) $id;
+    }
+    
+    return $id * 1.5;
+}
+```
+
+**Best Practices:**
+- Use union types to specify multiple valid types for parameters and returns
+- Combine with nullable types using `?` (e.g., `?string|int` is equivalent to `string|int|null`)
+- Keep union types as narrow as possible for better type safety
+- Don't overuse - if a function accepts too many different types, reconsider its design
+- Document behavior for different types to make functionality clear
+
+### Constructor Property Promotion
+
+Constructor property promotion simplifies class definitions by combining property declarations with constructor parameters.
+
+```php
+// Before PHP 8.0
+class User {
+    private string $name;
+    private int $age;
+    
+    public function __construct(string $name, int $age) {
+        $this->name = $name;
+        $this->age = $age;
+    }
+}
+
+// With PHP 8.0
+class User {
+    public function __construct(
+        private string $name,
+        private int $age
+    ) {}
+}
+```
+
+**Best Practices:**
+- Use for data transfer objects (DTOs) and value objects
+- Combine with readonly properties (PHP 8.1+) for immutable objects
+- Can mix promoted and regular properties when needed
+- Consider readability - for very complex constructors, traditional property declarations might be clearer
+- Default values can be specified normally: `private string $name = "Guest"`
+
+### Match Expression
+
+The `match` expression is an improved version of `switch` that returns a value and performs strict comparisons.
+
+```php
+$result = match ($status) {
+    200, 201 => 'Success',
+    400 => 'Bad request',
+    401, 403 => 'Authentication error',
+    404 => 'Not found',
+    default => 'Unknown status'
+};
+```
+
+**Best Practices:**
+- Use instead of `switch` for returning values based on conditions
+- Remember that `match` uses strict comparison (`===`) unlike `switch`
+- No need for `break` statements as only one arm is executed
+- Always include a `default` arm to handle unexpected values
+- Can use for complex conditional logic that would require multiple if/else statements
+
+### Nullsafe Operator
+
+The nullsafe operator (`?->`) allows you to call methods and access properties on potentially null values without explicit null checks.
+
+```php
+// Before PHP 8.0
+$country = null;
+if ($session !== null) {
+    $user = $session->user;
+    if ($user !== null) {
+        $country = $user->getAddress()?->country;
+    }
+}
+
+// With PHP 8.0
+$country = $session?->user?->getAddress()?->country;
+```
+
+**Best Practices:**
+- Use to simplify chains of property/method access that might contain null values
+- Combine with null coalescing operator for default values: `$country = $session?->user?->getAddress()?->country ?? 'Unknown';`
+- Helps eliminate boilerplate null-checking code
+- Improves readability for deeply nested property access
+- Don't overuse - if complex logic is needed based on null checks, explicit if statements may be clearer
+
+### Attributes (Annotations)
+
+PHP 8.0 introduces native attributes (similar to annotations in other languages) that allow adding metadata to classes, methods, properties, and more.
+
+```php
+#[Route("/api/posts", methods: ["GET"])]
+class PostController
+{
+    #[Required]
+    private string $title;
+    
+    #[Deprecated("Use fetchPosts() instead")]
+    public function getPosts(): array
+    {
+        // ...
+    }
+}
+```
+
+**Best Practices:**
+- Use for framework configuration instead of docblock annotations
+- Create custom attributes for metadata that impacts runtime behavior
+- Use built-in attributes like `#[Deprecated]` and `#[ReturnTypeWillChange]`
+- Document custom attributes thoroughly
+- Avoid overloading classes with too many attributes
+
+### Non-capturing Catches
+
+PHP 8.0 allows catching exceptions without capturing the exception variable when you don't need to use it.
+
+```php
+try {
+    // Code that might throw an exception
+} catch (ValidationException) {
+    // Handle ValidationException without using the exception object
+} catch (DatabaseException $e) {
+    // Handle DatabaseException using the exception object
+}
+```
+
+**Best Practices:**
+- Use when you only need to catch an exception type but don't need its data
+- Increases code clarity by not introducing unused variables
+- Still use the variable when you need exception details for logging or handling
+
+### Throw Expression
+
+`throw` is now an expression, allowing it to be used in expressions like ternary operations, arrow functions, etc.
+
+```php
+// Throw in arrow functions
+$fn = fn($x) => $x > 0 ? $x : throw new InvalidArgumentException("Value must be positive");
+
+// Throw in nullsafe chains
+$value = $data['key'] ?? throw new MissingKeyException("Key is required");
+```
+
+**Best Practices:**
+- Use for concise validation in expressions
+- Useful in arrow functions and null coalescing operations
+- Helps eliminate boilerplate code for parameter validation
+- Don't overuse - complex validation should still use standard if/throw blocks
+
+### New `str_contains()`, `str_starts_with()`, and `str_ends_with()` Functions
+
+PHP 8.0 adds native string helper functions that make common string operations more readable.
+
+```php
+// Old way
+if (strpos($haystack, $needle) !== false) { /* ... */ }
+if (strpos($haystack, $needle) === 0) { /* ... */ }
+if (substr($haystack, -strlen($needle)) === $needle) { /* ... */ }
+
+// PHP 8.0 way
+if (str_contains($haystack, $needle)) { /* ... */ }
+if (str_starts_with($haystack, $needle)) { /* ... */ }
+if (str_ends_with($haystack, $needle)) { /* ... */ }
+```
+
+**Best Practices:**
+- Always use these new functions instead of the older, less intuitive alternatives
+- Improves code readability and reduces potential for errors
+- No need to worry about weird edge cases or offsets
+
+### String to Number Comparison
+
+PHP 8.0 changes how strings are compared to numbers, making comparisons more consistent and predictable.
+
+```php
+// In PHP 7.x
+0 == 'foobar' // true (!)
+
+// In PHP 8.0
+0 == 'foobar' // false
+```
+
+**Best Practices:**
+- Use strict comparisons (`===` and `!==`) to avoid type conversion issues
+- Be aware of this change when migrating from PHP 7.x
+- Update your code to handle string-to-number comparisons explicitly when needed
+
+## Performance Improvements
+
+PHP 8.0 includes significant performance improvements:
+
+- JIT (Just-In-Time) compilation
+- Improved hash table implementation
+- Faster method calls
+- Consistent type errors
+- Optimized standard library functions
+
+**Best Practices:**
+- Enable OPcache and JIT for production environments
+- Profile your application to identify remaining bottlenecks
+- Update to PHP 8.0 to take advantage of performance improvements
+- Be aware that JIT benefits are most significant for CPU-intensive applications
+
+## Example: Putting It All Together
+
+Here's an example class that leverages PHP 8.0 features:
+
+```php
+class ProductService
+{
+    public function __construct(
+        private ProductRepository $repository,
+        private ?Logger $logger = null
+    ) {}
+    
+    #[Cached(ttl: 3600)]
+    public function getProduct(int|string $id): ?Product
+    {
+        try {
+            return match (gettype($id)) {
+                'integer' => $this->repository->findById($id),
+                'string' => $this->repository->findBySlug($id),
+                default => throw new InvalidArgumentException("Invalid ID type")
+            };
+        } catch (NotFoundException) {
+            $this->logger?->warning("Product not found", ['id' => $id]);
+            return null;
+        }
+    }
+    
+    public function calculatePrice(
+        Product $product,
+        ?Discount $discount = null,
+        bool $includeTax = true
+    ): float {
+        $price = $product->basePrice;
+        
+        // Nullsafe operator with discount
+        $price -= $discount?->getAmount($product) ?? 0;
+        
+        // Named arguments with str_contains for checking tax exemption
+        if ($includeTax && !str_contains($product->category, 'exempt')) {
+            $price *= 1.2; // Add 20% tax
+        }
+        
+        return $price;
+    }
+}
+```
+

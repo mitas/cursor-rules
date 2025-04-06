@@ -1,0 +1,186 @@
+---
+description: Python best practices and patterns for modern software development with Flask and SQLite
+globs: **/*.py, src/**/*.py, tests/**/*.py
+---
+
+# Python Best Practices
+
+## Using uv for Python Development
+- Use uv instead of standard Python commands for improved performance
+- Run Python scripts with: `uv run python script.py` instead of `python script.py`
+- Create virtual environments with: `uv venv` instead of `python -m venv`
+- Install packages with: `uv pip install package` instead of `pip install package`
+- Manage dependencies with uv instead of poetry or pip-tools:
+  - `uv pip compile pyproject.toml -o requirements.txt` to generate requirements
+  - `uv sync` to install dependencies from lockfile (preferred method)
+  - `uv pip sync requirements.txt` as alternative for requirements.txt files
+  - `uv add package` to add a dependency to a project
+  - `uv remove package` to remove a dependency from a project
+- Run tools without installing with: `uvx tool-name` (e.g., `uvx pytest`)
+- Install specific Python versions: `uv python install 3.11`
+- Use specific Python version: `uv run --python 3.11 script.py`
+- Pin Python version for a project: `uv python pin 3.11`
+
+## Code Formatting and Linting
+- Format code with Black through uv: `uv run black .`
+- Lint and fix code with Ruff: `uv run ruff check --fix .`
+- Add pre-commit hooks for Ruff and Black: 
+  ```yaml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  ```
+- Configure Ruff in pyproject.toml:
+  ```toml
+  [tool.ruff]
+  line-length = 79
+  target-version = "py311"
+  ```
+- Run Black and Ruff together: `uv run bash -c "ruff check --fix . && black ."`
+
+## Project Structure
+- Use src-layout with `src/your_package_name/`
+- Place tests in `tests/` directory parallel to `src/`
+- Keep configuration in `config/` or as environment variables
+- Store requirements in `pyproject.toml` (preferred with uv)
+- Place static files in `static/` directory
+- Use `templates/` for Jinja2 templates
+
+## Code Style
+- Follow Black code formatting
+- Use Ruff for comprehensive linting (includes isort functionality)
+- Follow PEP 8 naming conventions:
+  - snake_case for functions and variables
+  - PascalCase for classes
+  - UPPER_CASE for constants
+- Maximum line length of 79 characters (PEP 8 standard)
+- Use absolute imports over relative imports
+
+## Type Hints
+- Use type hints for all function parameters and returns
+- Import types from `typing` module
+- Use `Optional[Type]` instead of `Type | None`
+- Use `TypeVar` for generic types
+- Define custom types in `types.py`
+- Use `Protocol` for duck typing
+- If mypy.ini doesn't exist, create one with the following configuration:
+  ```ini
+  [mypy]
+  python_version = 3.13
+  disallow_untyped_defs = True
+  disallow_incomplete_defs = True
+  check_untyped_defs = True
+  disallow_untyped_decorators = True
+  no_implicit_optional = True
+  strict_optional = True
+  warn_redundant_casts = True
+  warn_return_any = True
+  warn_unused_ignores = True
+  warn_no_return = True
+  warn_unreachable = True
+
+  # Ignore missing imports globally
+  ignore_missing_imports = True
+
+  # Add ignore rules for project-specific libraries
+  # Replace these examples with your actual project dependencies:
+  [mypy-lxml.*]
+  ignore_missing_imports = True
+
+  [mypy-jsonlines.*]
+  ignore_missing_imports = True
+  ```
+
+## Flask Structure
+- Use Flask factory pattern
+- Organize routes using Blueprints
+- Use Flask-SQLAlchemy for database
+- Implement proper error handlers
+- Use Flask-Login for authentication
+- Structure views with proper separation of concerns
+
+## Database
+- Use SQLAlchemy ORM
+- Implement database migrations with Alembic
+- Use proper connection pooling
+- Define models in separate modules
+- Implement proper relationships
+- Use proper indexing strategies
+
+## Authentication
+- Use Flask-Login for session management
+- Implement Google OAuth using Flask-OAuth
+- Hash passwords with bcrypt
+- Use proper session security
+- Implement CSRF protection
+- Use proper role-based access control
+
+## API Design
+- Use Flask-RESTful for REST APIs
+- Implement proper request validation
+- Use proper HTTP status codes
+- Handle errors consistently
+- Use proper response formats
+- Implement proper rate limiting
+
+## Testing
+- Use pytest for testing through uv: `uv run pytest`
+- Write tests for all routes
+- Use pytest-cov for coverage: `uv run pytest --cov=src`
+- Implement proper fixtures
+- Use proper mocking with pytest-mock
+- Test all error scenarios
+
+## Security
+- Use HTTPS in production
+- Implement proper CORS
+- Sanitize all user inputs
+- Use proper session configuration
+- Implement proper logging
+- Follow OWASP guidelines
+
+## Performance
+- Use proper caching with Flask-Caching
+- Implement database query optimization
+- Use proper connection pooling
+- Implement proper pagination
+- Use background tasks for heavy operations
+- Monitor application performance
+
+## Error Handling
+- Create custom exception classes
+- Use proper try-except blocks
+- Implement proper logging
+- Return proper error responses
+- Handle edge cases properly
+- Use proper error messages
+
+## Documentation
+- Use Google-style docstrings
+- Document all public APIs
+- Keep README.md updated
+- Use proper inline comments
+- Generate API documentation
+- Document environment setup
+
+## Development Workflow
+- Use uv instead of traditional virtual environments: `uv venv`
+- Activate virtual environment: `source .venv/bin/activate` (same as traditional)
+- Implement pre-commit hooks with Ruff and Black
+- Use proper Git workflow
+- Follow semantic versioning
+- Use proper CI/CD practices
+- Implement proper logging
+
+## Dependencies
+- Use uv for dependency management
+- Define dependencies in pyproject.toml
+- Lock dependencies with: `uv lock`
+- Install from lockfile with: `uv sync` (preferred method)
+- Alternative: `uv pip sync requirements.txt` for requirements files
+- Separate dev dependencies in pyproject.toml
+- Regularly update dependencies with: `uv add --upgrade package`
+- Check for security vulnerabilities

@@ -1,0 +1,241 @@
+---
+description: "Follow this rule when writing PHP code to ensure consistent coding standards and best practices across all PHP versions"
+globs: **/*.php
+related_files:
+  - path: php-7.4.mdc
+    description: "Follow this rule when working with PHP 7.4 to leverage its specific features"
+  - path: php-8.0.mdc
+    description: "Follow this rule when working with PHP 8.0 to properly implement named arguments and union types"
+  - path: php-8.1.mdc
+    description: "Follow this rule when working with PHP 8.1 to correctly use enumerations and readonly properties"
+  - path: php-8.2.mdc
+    description: "Follow this rule when working with PHP 8.2 to properly implement readonly classes and DNF types"
+  - path: php-8.3.mdc
+    description: "Follow this rule when working with PHP 8.3 to correctly implement typed class constants"
+  - path: phpunit-test.mdc
+    description: "Follow this rule when writing or updating PHPUnit tests to ensure they follow best practices"
+---
+
+# PHP Coding Standards and Best Practices
+
+## Overview
+
+This document outlines the coding standards and best practices for PHP development, focusing on modern PHP principles applicable across PHP versions 7.4 and later.
+
+## Code Style
+
+### Naming Conventions
+
+- Classes: Use PascalCase (e.g., `UserProfile`, `DatabaseConnection`)
+- Methods/Functions: Use camelCase (e.g., `getUserData()`, `connectToDatabase()`)
+- Variables: Use camelCase (e.g., `$userData`, `$databaseConfig`)
+- Constants: Use UPPERCASE with underscores (e.g., `MAX_LOGIN_ATTEMPTS`, `DEFAULT_TIMEOUT`)
+- Private/Protected Properties: Prefix with underscore (e.g., `$_privateProperty`)
+- Namespaces: Use PascalCase (e.g., `App\Services\Authentication`)
+- Interfaces: Suffix with Interface (e.g., `RepositoryInterface`, `CacheInterface`)
+- Traits: Suffix with Trait (e.g., `LoggableTrait`, `SerializableTrait`)
+- Abstract Classes: Prefix with Abstract (e.g., `AbstractController`, `AbstractRepository`)
+
+### Code Formatting
+
+- Use 4 spaces for indentation, not tabs
+- Line length should generally not exceed 120 characters
+- Use one blank line to separate logical blocks of code
+- Place opening braces on the same line for control structures
+- Place opening braces on the next line for classes and methods
+- Include a space after control structure keywords and before parentheses
+- Use explicit visibility (`public`, `protected`, or `private`) for class methods and properties
+- Use trailing commas in multiline arrays
+- Avoid unnecessary parentheses
+
+```php
+// Good
+if ($condition) {
+    // code
+} else {
+    // code
+}
+
+// Good
+public function methodName($param1, $param2)
+{
+    // Method body
+}
+
+// Good
+$array = [
+    'key1' => 'value1',
+    'key2' => 'value2',
+];
+```
+
+## PHP Standards
+
+### Use Modern PHP Features
+
+- Prefer type declarations (scalar types, return types, nullable types)
+- Use native PHP functions over custom implementations when available
+- Use appropriate data structures (arrays, objects, generators)
+- Leverage PHP's built-in array functions (`array_map`, `array_filter`, etc.)
+- Use anonymous functions and arrow functions for simple callbacks
+
+### Error Handling
+
+- Use exceptions for error handling instead of returning error codes
+- Create custom exception classes for different error types
+- Use try-catch blocks to handle exceptions gracefully
+- Avoid suppressing errors with the `@` operator
+- Log exceptions and errors with appropriate severity levels
+
+```php
+try {
+    $result = $service->processSomething($data);
+} catch (ValidationException $e) {
+    // Handle validation errors
+    $logger->warning('Validation failed', ['error' => $e->getMessage()]);
+} catch (Exception $e) {
+    // Handle other exceptions
+    $logger->error('Processing failed', ['error' => $e->getMessage()]);
+    throw $e;
+}
+```
+
+### Security Practices
+
+- Always validate and sanitize user input
+- Use prepared statements for database queries
+- Implement proper CSRF protection
+- Hash passwords using password_hash() and password_verify()
+- Set proper HTTP headers for security
+- Follow the principle of least privilege
+- Use HTTPS for all production environments
+- Implement proper session management
+- Be aware of and prevent common vulnerabilities (XSS, CSRF, SQL Injection, etc.)
+
+```php
+// Password hashing
+$hashedPassword = password_hash($rawPassword, PASSWORD_DEFAULT, ['cost' => 12]);
+
+// Password verification
+if (password_verify($inputPassword, $storedHash)) {
+    // Authentication successful
+}
+
+// Prepared statements
+$stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+$stmt->execute(['email' => $userEmail]);
+```
+
+### Performance Optimization
+
+- Use appropriate caching mechanisms (OpCache, Redis, Memcached)
+- Optimize database queries (indexes, joins, limit results)
+- Use eager loading to prevent N+1 query problems
+- Profile and benchmark critical code paths
+- Use generators for processing large datasets
+- Implement proper pagination for large result sets
+- Consider using PHP's built-in web server for development only
+
+### Documentation
+
+- Use PHPDoc comments for classes, methods, and functions
+- Document parameters, return types, exceptions, and descriptions
+- Keep documentation up-to-date with code changes
+- Document complex algorithms and business logic
+- Use meaningful comments to explain "why" not "what"
+
+```php
+/**
+ * Process the user registration request.
+ *
+ * @param array $userData The user registration data
+ * @param bool $sendWelcomeEmail Whether to send a welcome email
+ * @return User The newly created user entity
+ * @throws ValidationException If user data fails validation
+ * @throws DuplicateEmailException If email is already registered
+ */
+public function registerUser(array $userData, bool $sendWelcomeEmail = true): User
+{
+    // Method implementation
+}
+```
+
+## Design Patterns and Architecture
+
+### SOLID Principles
+
+- **S**ingle Responsibility Principle: A class should have only one reason to change
+- **O**pen/Closed Principle: Classes should be open for extension but closed for modification
+- **L**iskov Substitution Principle: Subtypes must be substitutable for their base types
+- **I**nterface Segregation Principle: Clients should not be forced to depend on methods they do not use
+- **D**ependency Inversion Principle: Depend on abstractions, not on concretions
+
+### Design Patterns
+
+- Use dependency injection to manage class dependencies
+- Implement the repository pattern for data access
+- Use factories for complex object creation
+- Apply the adapter pattern for external service integration
+- Use the strategy pattern for interchangeable algorithms
+- Implement the observer pattern for event handling
+
+```php
+// Dependency Injection
+class UserService
+{
+    private $userRepository;
+    private $mailer;
+    
+    public function __construct(UserRepositoryInterface $userRepository, MailerInterface $mailer)
+    {
+        $this->userRepository = $userRepository;
+        $this->mailer = $mailer;
+    }
+    
+    // Service methods using injected dependencies
+}
+```
+
+### Testing
+
+- Write unit tests for business logic and domain models
+- Use integration tests for testing components together
+- Implement end-to-end tests for critical user flows
+- Mock external dependencies in unit tests
+- Maintain test coverage for refactoring safety
+- Follow the AAA pattern (Arrange, Act, Assert)
+- Keep tests independent and idempotent
+
+```php
+public function testUserRegistration(): void
+{
+    // Arrange
+    $userData = ['email' => 'test@example.com', 'name' => 'Test User'];
+    $repositoryMock = $this->createMock(UserRepositoryInterface::class);
+    $repositoryMock->expects($this->once())
+                 ->method('save')
+                 ->willReturn(new User($userData));
+    
+    $service = new UserService($repositoryMock, $this->mailerMock);
+    
+    // Act
+    $result = $service->registerUser($userData);
+    
+    // Assert
+    $this->assertInstanceOf(User::class, $result);
+    $this->assertEquals('test@example.com', $result->getEmail());
+}
+```
+
+## Frameworks and Libraries
+
+### Framework Usage
+
+- Follow framework-specific best practices and conventions
+- Use the framework's built-in tools for common tasks
+- Avoid "fighting the framework" and respect its architecture
+- Keep business logic independent of framework-specific code
+- Use dependency injection containers provided by the framework
+- Update framework versions regularly for security fixes
+
+

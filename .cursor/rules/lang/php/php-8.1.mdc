@@ -1,0 +1,341 @@
+---
+description: "Follow this rule when working with PHP 8.1 to correctly use enumerations, readonly properties, intersection types, and other features introduced in PHP 8.1"
+globs: **/*.php
+parent_file: php.mdc
+---
+
+# PHP 8.1 Features and Best Practices
+
+## Overview
+
+PHP 8.1 builds upon the foundation of PHP 8.0 with new features, performance improvements, and enhanced type safety. This document outlines the key features introduced in PHP 8.1 and provides best practices for their implementation.
+
+## Key Language Features
+
+### Enumerations (Enums)
+
+PHP 8.1 introduces first-class enumerations, allowing for strongly typed sets of possible values.
+
+```php
+enum Status {
+    case Draft;
+    case Published;
+    case Archived;
+}
+
+// Usage
+function updateStatus(Post $post, Status $status) {
+    $post->status = $status;
+    
+    match($status) {
+        Status::Draft => $this->sendDraftNotification(),
+        Status::Published => $this->publish(),
+        Status::Archived => $this->archive()
+    };
+}
+
+$post->updateStatus(Status::Published);
+```
+
+**Best Practices:**
+- Use enums instead of constants for representing a fixed set of possible values
+- Use backed enums (`enum Status: string {...}`) when you need to store the value in a database
+- Implement methods within enums to encapsulate behavior related to each enum value
+- Use enums as type declarations for method parameters and return types
+- Consider implementing interfaces in enums when they need to fit into a type system
+
+### Readonly Properties
+
+The `readonly` modifier prevents properties from being modified after initialization.
+
+```php
+class User {
+    public function __construct(
+        public readonly string $id,
+        public readonly string $name,
+        public readonly string $email
+    ) {}
+}
+
+$user = new User('1', 'John', 'john@example.com');
+// $user->name = 'Jane'; // This would trigger an error
+```
+
+**Best Practices:**
+- Use readonly for properties that should not change after object creation
+- Combine with constructor property promotion for concise immutable value objects
+- Use for data transfer objects (DTOs) and entities
+- Consider using readonly properties instead of getter methods in simple cases
+- Remember that readonly applies to the property, not the objects it might reference
+
+### Intersection Types
+
+Intersection types allow you to specify that a value must be of all the specified types.
+
+```php
+function process(Countable&Iterator $collection) {
+    // $collection is both Countable and Iterator
+    $count = count($collection);
+    
+    foreach ($collection as $item) {
+        // Process each item
+    }
+}
+```
+
+**Best Practices:**
+- Use for type constraints that require multiple interfaces
+- Particularly useful with interfaces rather than concrete classes
+- Combine with union types for complex type requirements
+- Don't overuse - if you need many intersections, consider refactoring
+- Remember that intersection types work with interfaces and classes, not primitive types
+
+### Never Return Type
+
+The `never` return type indicates that a function will not return normally (it will either throw an exception or terminate the script).
+
+```php
+function redirect(string $url): never {
+    header("Location: $url");
+    exit();
+}
+
+function fail(string $message): never {
+    throw new Exception($message);
+}
+```
+
+**Best Practices:**
+- Use for functions that never return control to the caller
+- Appropriate for functions that throw exceptions or terminate execution
+- Helps static analyzers and IDEs understand control flow
+- Useful for utility functions like redirects, error handlers, and exit points
+
+### Fibers (Coroutines)
+
+PHP 8.1 introduces Fibers for implementing coroutines, enabling cooperative multitasking.
+
+```php
+$fiber = new Fiber(function (): void {
+    $value = Fiber::suspend('fiber suspended');
+    echo "Value used to resume fiber: $value\n";
+});
+
+$value = $fiber->start();
+echo "Fiber suspended with value: $value\n";
+$fiber->resume('fiber resumed');
+```
+
+**Best Practices:**
+- Use for asynchronous programming without callbacks
+- Helpful for implementing non-blocking I/O operations
+- Consider using a high-level library that leverages Fibers instead of using them directly
+- Be aware of potential challenges with error handling and debugging
+- Test thoroughly, as Fibers can make code flow less obvious
+
+### First-class Callable Syntax
+
+PHP 8.1 allows creating closures from callable strings with the new first-class callable syntax.
+
+```php
+// Before PHP 8.1
+$fn = Closure::fromCallable('strlen');
+
+// With PHP 8.1
+$fn = strlen(...);
+
+// Usage
+$lengths = array_map(strlen(...), $strings);
+```
+
+**Best Practices:**
+- Use for creating closures from existing functions
+- Helpful when using functions like `array_map`, `array_filter`, etc.
+- More concise than closures for simple function references
+- Improves readability when the original function name is descriptive enough
+
+### New in Initializers
+
+PHP 8.1 allows using the `new` keyword in parameter default values, attribute arguments, and other contexts.
+
+```php
+class Service {
+    public function __construct(
+        private Logger $logger = new NullLogger(),
+        private Cache $cache = new ArrayCache()
+    ) {}
+}
+
+#[Route(new DefaultRouteProvider())]
+public function index() {
+    // ...
+}
+```
+
+**Best Practices:**
+- Use for providing default implementations in constructors
+- Helpful for optional dependencies with sensible defaults
+- Consider the performance impact of creating objects that might not be used
+- Use with caution in attribute arguments, as these objects are created when classes are loaded
+
+### Pure Intersection Types
+
+PHP 8.1 allows using intersection types not only as standalone types but also in union types.
+
+```php
+function process(
+    Countable&Iterator|ArrayObject $collection
+): int|float {
+    // Process collection
+}
+```
+
+**Best Practices:**
+- Use when you need complex type constraints
+- Combine with union types judiciously
+- Consider readability - very complex type expressions might be hard to understand
+- Document the expected behavior for each possible type
+
+### Array Unpacking Support for String-Keyed Arrays
+
+PHP 8.1 extends array unpacking to support string keys.
+
+```php
+$defaults = ['timeout' => 5, 'retries' => 3];
+$config = [...$defaults, 'timeout' => 10, 'debug' => true];
+// $config is ['timeout' => 10, 'retries' => 3, 'debug' => true]
+```
+
+**Best Practices:**
+- Use for merging configuration arrays
+- Great for applying defaults and overrides
+- Later keys overwrite earlier ones with the same name
+- More readable than `array_merge()` for simple cases
+- Consider using named arguments for function calls instead of building parameter arrays
+
+### Final Class Constants
+
+PHP 8.1 allows marking class constants as `final` in child classes.
+
+```php
+class Base {
+    public const FORMAT = 'base';
+    public final const VERSION = '1.0';
+}
+
+class Child extends Base {
+    public const FORMAT = 'child'; // OK
+    // public const VERSION = '2.0'; // Error: Cannot override final constant
+}
+```
+
+**Best Practices:**
+- Use for constants that must not be overridden by child classes
+- Particularly useful for version numbers, API endpoints, and other critical values
+- Helps prevent accidental breaking changes in inheritance hierarchies
+
+### Explicit Octal Numeral Notation
+
+PHP 8.1 introduces a new octal notation with the `0o` prefix.
+
+```php
+// Old octal notation
+$oldOctal = 0777; // 511 in decimal
+
+// New explicit octal notation
+$newOctal = 0o777; // 511 in decimal
+```
+
+**Best Practices:**
+- Use the new `0o` syntax for octal numbers for clarity
+- Especially important for file permissions to make the code more readable
+- Avoid the old notation (with just a leading 0) as it can be confusing
+
+## Example: Putting It All Together
+
+Here's an example class that leverages PHP 8.1 features:
+
+```php
+enum PaymentStatus: string {
+    case Pending = 'pending';
+    case Completed = 'completed';
+    case Failed = 'failed';
+    
+    public function isTerminal(): bool {
+        return match($this) {
+            self::Completed, self::Failed => true,
+            self::Pending => false
+        };
+    }
+    
+    public function getIcon(): string {
+        return match($this) {
+            self::Pending => '⏳',
+            self::Completed => '✅',
+            self::Failed => '❌'
+        };
+    }
+}
+
+class Payment {
+    public function __construct(
+        public readonly string $id,
+        public readonly float $amount,
+        private PaymentStatus $status = PaymentStatus::Pending,
+        private ?DateTime $completedAt = null,
+        private readonly Logger $logger = new NullLogger()
+    ) {}
+    
+    public function getStatus(): PaymentStatus {
+        return $this->status;
+    }
+    
+    public function complete(): never {
+        if ($this->status === PaymentStatus::Completed) {
+            throw new InvalidOperationException("Payment already completed");
+        }
+        
+        $this->status = PaymentStatus::Completed;
+        $this->completedAt = new DateTime();
+        $this->logger->info("Payment completed", ['id' => $this->id]);
+        
+        header("Location: /payments/{$this->id}/receipt");
+        exit();
+    }
+    
+    public function fail(string $reason): void {
+        if ($this->status->isTerminal()) {
+            throw new InvalidOperationException("Cannot fail a payment in terminal state");
+        }
+        
+        $this->status = PaymentStatus::Failed;
+        $this->logger->error("Payment failed", [
+            'id' => $this->id,
+            'reason' => $reason
+        ]);
+    }
+}
+
+function processPayment(
+    Payment $payment,
+    Processor&Validator $processor
+): void {
+    try {
+        $config = [
+            ...DEFAULT_PROCESSOR_CONFIG,
+            'amount' => $payment->amount,
+            'reference' => $payment->id
+        ];
+        
+        $processor->process($config);
+        
+        if ($payment->getStatus() === PaymentStatus::Pending) {
+            $payment->complete();
+        }
+    } catch (Exception $e) {
+        $payment->fail($e->getMessage());
+        throw $e;
+    }
+}
+```
+

@@ -1,0 +1,290 @@
+---
+description: "Follow this rule when working with PHP 8.2 to properly implement readonly classes, disjunctive normal form types, and other features introduced in PHP 8.2"
+globs: **/*.php
+parent_file: php.mdc
+---
+
+# PHP 8.2 Features and Best Practices
+
+## Overview
+
+PHP 8.2 continues the language's evolution with new features, deprecations, and performance improvements. This document outlines the key features introduced in PHP 8.2 and provides best practices for their implementation.
+
+## Key Language Features
+
+### Readonly Classes
+
+PHP 8.2 introduces readonly classes, which automatically make all declared properties readonly without having to declare each property individually as readonly.
+
+```php
+readonly class User {
+    public function __construct(
+        public string $id,
+        public string $name,
+        public string $email
+    ) {}
+}
+
+$user = new User('1', 'John', 'john@example.com');
+// $user->name = 'Jane'; // This would trigger an error
+```
+
+**Best Practices:**
+- Use readonly classes for immutable value objects and DTOs
+- Combines well with constructor property promotion for concise code
+- Great for entities where you want to ensure data integrity
+- Remember that readonly applies to properties but not to methods
+- Consider using readonly classes instead of creating getters for all properties
+
+### Disjunctive Normal Form (DNF) Types
+
+PHP 8.2 supports Disjunctive Normal Form types, allowing more complex type expressions by combining union and intersection types.
+
+```php
+function process(
+    (Countable&Iterator)|array|Traversable $collection
+): (int&Stringable)|string {
+    // Process collection
+}
+```
+
+**Best Practices:**
+- Use for complex type constraints that need both union and intersection types
+- Parentheses clarify the type hierarchy and grouping
+- Keep type expressions as simple as possible for readability
+- Document complex type requirements thoroughly
+- Consider if a complex type might be better represented by an interface
+
+### Allow null and false as Stand-alone Types
+
+PHP 8.2 allows using `null` and `false` as standalone types, not just in union types.
+
+```php
+function alwaysReturnsNull(): null {
+    return null;
+}
+
+function processBooleanResult(): false|int {
+    // Return false for failure or an integer for success
+}
+```
+
+**Best Practices:**
+- Use `null` as a return type for functions that always return null
+- Use `false` as a return type or part of a union for functions that return false to indicate failure
+- Prefer union types like `string|null` over nullable types (`?string`) when appropriate
+- Consider if a function that always returns null might be better redesigned
+
+### New Random Extension
+
+PHP 8.2 includes a new Random extension that provides better tools for generating random values.
+
+```php
+// Generate a random integer
+$random = new \Random\Randomizer();
+$int = $random->getInt(1, 100);
+
+// Generate a random string
+$bytes = $random->getBytes(32);
+$string = bin2hex($bytes);
+
+// Use a specific random engine
+$engine = new \Random\Engine\Mt19937(1234); // Seeded for reproducibility
+$seededRandomizer = new \Random\Randomizer($engine);
+```
+
+**Best Practices:**
+- Use the new Random extension instead of older functions like `rand()`, `mt_rand()`, etc.
+- Use `\Random\Randomizer` for cryptographically secure random values
+- Choose appropriate random engines based on your requirements
+- For cryptographic purposes, use the default engine which is secure
+- For reproducible sequences (e.g., for testing), use a seeded engine
+
+### Sensitive Parameter Attribute
+
+PHP 8.2 introduces the `#[SensitiveParameter]` attribute to mark parameters that contain sensitive information.
+
+```php
+function connectToDatabase(
+    string $host,
+    string $username,
+    #[SensitiveParameter] string $password
+) {
+    // Database connection logic
+}
+```
+
+**Best Practices:**
+- Use for parameters containing passwords, API keys, personal data, etc.
+- Helps prevent sensitive data from appearing in error logs, backtraces, and var_dumps
+- Apply consistently across your codebase for all sensitive parameters
+- Consider using this attribute in combination with proper data encryption and security practices
+
+### Constants in Traits
+
+PHP 8.2 allows defining constants in traits.
+
+```php
+trait HasStatus {
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_INACTIVE = 'inactive';
+    
+    public function isActive(string $status): bool {
+        return $status === self::STATUS_ACTIVE;
+    }
+}
+
+class User {
+    use HasStatus;
+    
+    // Can now access User::STATUS_ACTIVE
+}
+```
+
+**Best Practices:**
+- Use trait constants to share common values across classes
+- Keep trait constants related to the functionality provided by the trait
+- Be aware of potential constant collisions when using multiple traits
+- Document trait constants thoroughly
+- Consider visibility modifiers for trait constants based on their intended use
+
+### Deprecated Dynamic Properties
+
+PHP 8.2 deprecates dynamic properties (properties that are created at runtime without being declared in the class).
+
+```php
+class User {
+    public string $name;
+    // No $email property declared
+}
+
+$user = new User();
+$user->name = 'John'; // OK
+$user->email = 'john@example.com'; // Deprecated warning
+
+// Solution: Declare all properties
+class User {
+    public string $name;
+    public ?string $email = null;
+}
+
+// Alternative: Use stdClass or ArrayObject for dynamic data
+$data = new stdClass();
+$data->anything = 'value'; // No warning
+```
+
+**Best Practices:**
+- Declare all properties your class will use
+- For truly dynamic data, use `stdClass`, `ArrayObject`, or arrays
+- Consider implementing `__get` and `__set` magic methods for controlled property access
+- Use the `#[AllowDynamicProperties]` attribute for classes that legitimately need dynamic properties
+- Update legacy code to explicitly declare all properties
+
+### Deprecated ${} String Interpolation
+
+PHP 8.2 deprecates the `${}` string interpolation syntax.
+
+```php
+// Deprecated
+$name = 'John';
+echo "Hello, ${name}!";
+
+// Use this instead
+echo "Hello, {$name}!";
+// Or
+echo "Hello, $name!";
+```
+
+**Best Practices:**
+- Update code to use `{$var}` or `$var` syntax for string interpolation
+- Use static analysis tools to find and fix these deprecated usages
+- Consider using string concatenation or sprintf for complex string building
+
+## Performance Improvements
+
+PHP 8.2 includes various performance improvements:
+
+- Better array copying performance
+- Optimized method and property access
+- Improved opcache efficiency
+- Reduced memory usage
+
+**Best Practices:**
+- Keep PHP updated to benefit from ongoing performance improvements
+- Profile your application to identify bottlenecks
+- Use opcache in production environments
+
+## Example: Putting It All Together
+
+Here's an example class that leverages PHP 8.2 features:
+
+```php
+trait HasMetadata {
+    public const CREATED_AT_KEY = 'created_at';
+    public const UPDATED_AT_KEY = 'updated_at';
+    
+    private array $metadata = [];
+    
+    public function setMetadata(string $key, mixed $value): void {
+        $this->metadata[$key] = $value;
+    }
+    
+    public function getMetadata(string $key): mixed {
+        return $this->metadata[$key] ?? null;
+    }
+}
+
+readonly class User {
+    use HasMetadata;
+    
+    /** @var array<Role> */
+    private array $roles = [];
+    
+    /**
+     * @param array<Role> $roles
+     */
+    public function __construct(
+        public string $id,
+        public string $name,
+        public string $email,
+        array $roles = [],
+        #[SensitiveParameter] private ?string $passwordHash = null
+    ) {
+        $this->roles = $roles;
+        $this->setMetadata(self::CREATED_AT_KEY, new DateTime());
+    }
+    
+    public function hasRole(Role|string $role): bool {
+        $roleId = $role instanceof Role ? $role->id : $role;
+        
+        foreach ($this->roles as $userRole) {
+            if ($userRole->id === $roleId) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public function verifyPassword(#[SensitiveParameter] string $password): bool {
+        if ($this->passwordHash === null) {
+            return false;
+        }
+        
+        return password_verify($password, $this->passwordHash);
+    }
+    
+    /**
+     * @return array<Role>
+     */
+    public function getRoles(): array {
+        return $this->roles;
+    }
+    
+    public function generateApiToken(): string {
+        $random = new \Random\Randomizer();
+        return bin2hex($random->getBytes(32));
+    }
+}
+```
+

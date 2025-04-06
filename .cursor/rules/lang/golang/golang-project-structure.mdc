@@ -1,0 +1,251 @@
+---
+description: Go project structure guidelines and best practices
+globs: **/*.go
+---
+
+# Go Project Structure Best Practices
+
+## Core Principles
+
+- Your project structure should reflect its complexity and size
+- Follow the standard Go project layout for consistency and maintainability
+- Package names should be lowercase, short, and not plural
+- Group related functionality in the same package
+- Keep package dependencies minimal and avoid circular dependencies
+- Use internal directories for code not meant for external use
+- Strictly separate application configuration from business logic
+
+## Recommended Project Structures
+
+### Flat Structure
+
+**For small projects and prototypes:**
+
+```
+project/
+├── main.go        # Application entry point
+├── handler.go     # HTTP handlers
+├── service.go     # Business logic
+├── repository.go  # Database repository
+├── config.go      # Configuration settings
+├── utils.go       # Utility functions
+├── go.mod         # Go module file
+└── go.sum         # Go module dependency file
+```
+
+**When to use:**
+- Small utility applications
+- Prototypes and MVPs
+- Simple command-line tools
+- Learning projects
+
+### Standard Layout
+
+**For medium to large applications:**
+
+```
+project/
+├── cmd/                          # Main applications
+│   └── app/                      # Application entry point
+│       └── main.go               # Main application logic
+├── internal/                     # Private application code
+│   ├── handlers/                 # HTTP request handlers
+│   │   └── user_handler.go       # User-specific handler
+│   ├── services/                 # Business logic layer
+│   │   └── user_service.go       # User-specific service
+│   ├── repositories/             # Data access layer
+│   │   └── user_repo.go          # User-specific repository
+│   └── models/                   # Data models
+│       └── user.go               # User model
+├── pkg/                          # Public libraries for external use
+│   └── common/                   # Common utilities
+├── configs/                      # Configuration files
+│   └── config.yaml               # Application config
+├── api/                          # API definitions (OpenAPI/Swagger)
+├── web/                          # Web assets (templates, static files)
+├── docs/                         # Documentation
+├── scripts/                      # Build and deployment scripts
+├── test/                         # Additional test resources
+├── go.mod                        # Go module definition
+└── go.sum                        # Go module checksums
+```
+
+**When to use:**
+- Medium to large applications
+- Projects that require clear layer separation
+- Applications with multiple external dependencies
+- Projects maintained by multiple developers
+
+### Domain-Driven Structure
+
+**For complex business applications:**
+
+```
+project/
+├── cmd/                        # Command-related files
+│   └── app/                    # Application entry point
+│       └── main.go             # Main application logic
+├── internal/                   # Internal codebase
+│   ├── user/                   # Domain: user
+│   │   ├── handler.go          # User-specific handler
+│   │   ├── service.go          # User-specific service
+│   │   ├── repository.go       # User-specific repository
+│   │   └── user.go             # User model
+│   ├── product/                # Domain: product
+│   │   ├── handler.go          # Product-specific handler
+│   │   ├── service.go          # Product-specific service
+│   │   ├── repository.go       # Product-specific repository
+│   │   └── product.go          # Product model
+│   └── common/                 # Shared code between domains
+├── pkg/                        # Shared libraries
+├── configs/                    # Configuration files
+├── go.mod                      # Go module definition
+└── go.sum                      # Go module checksums
+```
+
+**When to use:**
+- Complex applications with distinct business domains
+- Projects requiring clear separation between different entities
+- When domain logic needs isolation for maintainability
+
+### Microservices Structure
+
+**For distributed systems:**
+
+```
+project/
+├── services/
+│   ├── user-service/
+│   │   ├── cmd/
+│   │   │   └── main.go         # User service entry point
+│   │   ├── internal/           # User service internal code
+│   │   │   ├── handler/
+│   │   │   ├── service/
+│   │   │   ├── repository/
+│   │   │   └── model/
+│   │   ├── go.mod              # User service module
+│   │   └── go.sum
+│   └── product-service/        # Similar structure for product service
+├── pkg/                        # Shared code between services
+│   ├── logging/
+│   ├── auth/
+│   └── database/
+├── api/                        # API definitions
+├── scripts/                    # Build and deployment scripts
+└── go.work                     # Go workspaces file (Go 1.18+)
+```
+
+**When to use:**
+- Distributed systems with multiple services
+- Applications that require individual scaling
+- Projects with separate teams working on different services
+
+## Directory Purposes
+
+| Directory  | Purpose |
+|------------|---------|
+| `cmd/`     | Main applications for the project. Each subdirectory should contain a main package with an executable entry point. |
+| `internal/`| Private application and library code not meant to be imported by other projects. |
+| `pkg/`     | Library code that's safe to use by external applications. |
+| `api/`     | API specifications, protocol definition files, OpenAPI/Swagger specs. |
+| `web/`     | Web application specific components: static assets, web templates, SPAs. |
+| `configs/` | Configuration file templates or default configurations. |
+| `scripts/` | Scripts for build, install, analysis, etc. |
+| `docs/`    | Design and user documentation. |
+| `examples/`| Examples for applications and libraries. |
+| `test/`    | Additional external test apps and test data. |
+
+## Package Guidelines
+
+1. **Package Naming**
+   - Use short, lowercase, singular nouns
+   - Avoid generic names like "util", "common", "misc"
+   - Name should reflect the package's purpose
+   - Don't use underscores or mixedCaps
+
+2. **Package Structure**
+   - Keep packages focused on a single responsibility
+   - Minimize the number of exported identifiers
+   - Group related types and functions
+   - Create subpackages when necessary for better organization
+
+3. **Import Organization**
+   - Group imports into standard library, third-party, and local packages
+   - Within each group, imports should be ordered alphabetically
+   - Use aliases when necessary to avoid name conflicts
+
+## File Organization
+
+1. **Main Application Files**
+   - Keep main.go focused on application initialization
+   - Separate concerns into different files
+   - Group related functions in the same file
+   - Follow a consistent naming pattern
+
+2. **Test Files**
+   - Place tests in the same package as the code being tested
+   - Use the `_test.go` suffix
+   - Organize tests to mirror the structure of the code being tested
+   - Use table-driven tests for multiple test cases
+
+## Common Mistakes to Avoid
+
+1. **Deep Nesting**
+   - Avoid creating deeply nested directory structures
+   - Prefer flat structures where possible
+   - Don't create directories for a single file
+
+2. **Circular Dependencies**
+   - Ensure packages don't depend on each other circularly
+   - Use interface abstractions to break dependency cycles
+   - Consider refactoring if circular dependencies emerge
+
+3. **Package Overloading**
+   - Don't put unrelated code in the same package
+   - Split large packages into smaller, focused ones
+   - Avoid catchall packages like "util" or "misc"
+
+4. **Ignoring Go Conventions**
+   - Follow standard Go project layout conventions
+   - Use idiomatic Go package and file naming
+   - Don't organize by technical layers across all domains
+
+## Anti-Patterns
+
+1. **MVC-style Organization**
+   - Don't separate controllers, models, and views across all domains
+   - Prefer domain-based organization with layers within each domain
+
+2. **Framework-Based Structure**
+   - Don't blindly follow web framework directory conventions
+   - Structure around your application's needs, not framework expectations
+
+3. **Single Package Applications**
+   - Don't put all code in a single package for non-trivial applications
+   - Use packages to create logical boundaries
+
+4. **Inconsistent Structure**
+   - Don't mix different organizational approaches
+   - Be consistent across similar components
+
+## Best Practices for Growth
+
+1. **Start Simple**
+   - Begin with a simpler structure for new projects
+   - Add complexity only as needed
+   - Refactor as the application grows
+
+2. **Plan for Scale**
+   - Consider how the structure will accommodate growth
+   - Design with future requirements in mind
+   - Create clear boundaries between components
+
+3. **Document Decisions**
+   - Document structural decisions and reasoning
+   - Include a README with an overview of the project structure
+   - Consider creating architecture documentation for complex projects
+
+4. **Regular Refactoring**
+   - Revisit the structure periodically
+   - Refactor when pain points emerge
+   - Don't be afraid to reorganize when needed

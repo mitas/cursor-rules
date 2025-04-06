@@ -1,0 +1,336 @@
+---
+description: "Follow this rule when working with PHP 8.3 to correctly implement typed class constants, override attributes, and other features introduced in PHP 8.3"
+globs: **/*.php
+parent_file: php.mdc
+---
+
+# PHP 8.3 Features and Best Practices
+
+## Overview
+
+PHP 8.3 continues to refine the language with new features, performance improvements, and subtle enhancements. This document outlines the key features introduced in PHP 8.3 and provides best practices for their implementation.
+
+## Key Language Features
+
+### Typed Class Constants
+
+PHP 8.3 introduces typed class constants, allowing you to specify the type of constant values.
+
+```php
+class Configuration {
+    public const string DATABASE_DRIVER = 'mysql';
+    public const int CONNECTION_TIMEOUT = 30;
+    protected const array DEFAULT_OPTIONS = ['retries' => 3, 'timeout' => 5];
+}
+```
+
+**Best Practices:**
+- Use typed constants to enforce type safety for important configuration values
+- Apply appropriate visibility modifiers (public, protected, private) to constants
+- Use typed constants in combination with final when appropriate
+- Document constants with PHPDoc comments for additional context
+- Consider using enums instead of string constants for values that represent a fixed set of options
+
+### Dynamic Class Constant Fetch
+
+PHP 8.3 enables fetching class constants dynamically, similar to dynamic property access.
+
+```php
+class Constants {
+    public const ERROR_NOT_FOUND = 'not_found';
+    public const ERROR_UNAUTHORIZED = 'unauthorized';
+}
+
+function getErrorMessage(string $errorType): string {
+    return Constants::{"ERROR_$errorType"};
+}
+
+// Usage
+$message = getErrorMessage('NOT_FOUND');
+```
+
+**Best Practices:**
+- Use dynamic constant fetching when you need to access constants programmatically
+- Validate the constant name before attempting to access it dynamically
+- Consider using reflection for more complex dynamic constant access
+- Document code that uses dynamic constant fetching thoroughly
+- Use with caution as it can make code harder to understand and maintain
+
+### New #[\Override] Attribute
+
+PHP 8.3 adds the `#[\Override]` attribute to explicitly mark methods that override a parent method or implement an interface method.
+
+```php
+class Parent {
+    public function process($data) {
+        // Implementation
+    }
+}
+
+class Child extends Parent {
+    #[\Override]
+    public function process($data) {
+        // Override implementation
+    }
+}
+```
+
+**Best Practices:**
+- Use the Override attribute on all methods that override parent methods
+- Helps catch errors when parent methods are renamed or removed
+- Makes inheritance relationships more explicit in the code
+- Particularly useful in large codebases with deep inheritance hierarchies
+- Can be used for interface implementations to clarify intent
+
+### Improvements to Readonly Properties
+
+PHP 8.3 improves the behavior of readonly properties in anonymous classes.
+
+```php
+$instance = new class {
+    public readonly string $property;
+    
+    public function __construct(string $value) {
+        $this->property = $value;
+    }
+};
+```
+
+**Best Practices:**
+- Use readonly properties in anonymous classes when appropriate
+- Consider readonly for properties that should be immutable after initialization
+- Combine with constructor property promotion when creating simple anonymous classes
+- Remember that readonly applies to the property, not its contents
+
+### New JSON Validate Functions
+
+PHP 8.3 adds native functions for validating JSON strings without parsing them completely.
+
+```php
+// Check if a string contains valid JSON
+if (json_validate($jsonString)) {
+    // Process valid JSON
+}
+
+// No need to use json_decode and check for errors
+```
+
+**Best Practices:**
+- Use `json_validate()` when you only need to check if JSON is valid
+- More efficient than `json_decode()` for validation-only operations
+- Useful for API endpoints that receive JSON data
+- Combine with detailed validation after parsing for production code
+- Consider using with JSON schemas for more thorough validation
+
+### Anonymous Class Creation from Objects
+
+PHP 8.3 allows creating anonymous classes from existing objects, copying their properties.
+
+```php
+$data = new stdClass();
+$data->name = 'John';
+$data->email = 'john@example.com';
+
+$user = new class($data) {
+    public string $name;
+    public string $email;
+    
+    public function __construct(object $data) {
+        $this->name = $data->name;
+        $this->email = $data->email;
+    }
+    
+    public function getDisplayName(): string {
+        return $this->name . ' <' . $this->email . '>';
+    }
+};
+
+echo $user->getDisplayName(); // "John <john@example.com>"
+```
+
+**Best Practices:**
+- Use for adding behavior to data objects on the fly
+- Helpful for transforming simple data objects into richer models
+- Consider for prototyping and quick implementations
+- For production code, prefer named classes for better maintainability
+- Document anonymous classes thoroughly if they contain complex logic
+
+### Improved Variance for Static Properties with Static Return Types
+
+PHP 8.3 improves variance for static properties when using static return types in methods.
+
+```php
+class Base {
+    public static function getInstance(): static {
+        return new static();
+    }
+}
+
+class Child extends Base {
+    // Now works correctly with static return type
+}
+
+$instance = Child::getInstance(); // Returns Child instance
+```
+
+**Best Practices:**
+- Use static return types for factory methods, fluent interfaces, and cloning
+- Implement the singleton pattern using static return types
+- Leverage this feature for builder patterns and method chaining
+- Be aware of potential issues with deep inheritance hierarchies
+- Document the behavior of static return types for clarity
+
+### New mb_str_pad Function
+
+PHP 8.3 introduces `mb_str_pad()` for padding multibyte strings.
+
+```php
+// Properly pads multibyte strings
+$padded = mb_str_pad($multibyteString, 20, " ", STR_PAD_RIGHT);
+```
+
+**Best Practices:**
+- Use `mb_str_pad()` instead of `str_pad()` when working with multibyte strings (UTF-8, etc.)
+- Consider character width, not just byte count, when padding strings
+- Useful for formatting output in international applications
+- Combine with other multibyte string functions for consistent behavior
+- Be mindful of performance when processing large strings
+
+### More Consistent DateTime/DateTimeImmutable
+
+PHP 8.3 makes improvements to the DateTime and DateTimeImmutable classes for more consistent behavior.
+
+```php
+// More consistent behavior with timezones and formats
+$date = new DateTimeImmutable('2023-01-01', new DateTimeZone('UTC'));
+$modified = $date->setTimezone(new DateTimeZone('America/New_York'));
+```
+
+**Best Practices:**
+- Prefer `DateTimeImmutable` over `DateTime` to prevent unexpected changes
+- Explicitly specify timezones when creating date objects
+- Use named constructors (`createFromFormat()`) for parsing specific date formats
+- Be aware of the changes when migrating from earlier PHP versions
+- Update tests that rely on DateTime behavior if needed
+
+## Performance Improvements
+
+PHP 8.3 includes various performance improvements:
+
+- Faster array and string operations
+- Improved JIT compilation
+- Better memory management
+- Optimized function calls
+
+**Best Practices:**
+- Keep PHP updated to benefit from ongoing performance improvements
+- Profile your application to identify bottlenecks
+- Use opcache and JIT in production environments
+- Take advantage of the improved array functions
+
+## Example: Putting It All Together
+
+Here's an example class that leverages PHP 8.3 features:
+
+```php
+class ApiResponse {
+    public const string STATUS_SUCCESS = 'success';
+    public const string STATUS_ERROR = 'error';
+    public const array VALID_STATUSES = [self::STATUS_SUCCESS, self::STATUS_ERROR];
+    
+    public static function create(
+        string $status, 
+        mixed $data = null, 
+        ?string $message = null
+    ): static {
+        return new static($status, $data, $message);
+    }
+    
+    public function __construct(
+        public readonly string $status,
+        public readonly mixed $data = null,
+        public readonly ?string $message = null
+    ) {
+        if (!in_array($status, self::VALID_STATUSES)) {
+            throw new InvalidArgumentException("Invalid status: $status");
+        }
+    }
+    
+    #[\Override]
+    public function __toString(): string {
+        return json_encode([
+            'status' => $this->status,
+            'data' => $this->data,
+            'message' => $this->message
+        ]);
+    }
+    
+    public function isSuccess(): bool {
+        return $this->status === self::STATUS_SUCCESS;
+    }
+    
+    public function isError(): bool {
+        return $this->status === self::STATUS_ERROR;
+    }
+    
+    public static function success(mixed $data = null, ?string $message = null): static {
+        return static::create(self::STATUS_SUCCESS, $data, $message);
+    }
+    
+    public static function error(?string $message = null, mixed $data = null): static {
+        return static::create(self::STATUS_ERROR, $data, $message);
+    }
+    
+    public function withPaddedMessage(int $length): static {
+        if (!$this->message) {
+            return $this;
+        }
+        
+        $paddedMessage = mb_str_pad($this->message, $length, ' ');
+        return new static($this->status, $this->data, $paddedMessage);
+    }
+}
+
+class JsonService {
+    public function validateInput(string $json): bool {
+        return json_validate($json);
+    }
+    
+    public function processApiRequest(string $json): ApiResponse {
+        if (!$this->validateInput($json)) {
+            return ApiResponse::error("Invalid JSON format");
+        }
+        
+        $data = json_decode($json, true);
+        
+        // Process data and return response
+        return ApiResponse::success($data, "Request processed successfully");
+    }
+    
+    /**
+     * Dynamically get the error type constant based on error code
+     */
+    public function getErrorType(string $errorCode): string {
+        $constantName = "ERROR_" . strtoupper($errorCode);
+        
+        if (defined(ApiErrors::class . "::$constantName")) {
+            return ApiErrors::$constantName;
+        }
+        
+        // Dynamic constant fetch
+        try {
+            return ApiErrors::{$constantName};
+        } catch (Error $e) {
+            return ApiErrors::ERROR_UNKNOWN;
+        }
+    }
+}
+
+class ApiErrors {
+    public const string ERROR_NOT_FOUND = 'resource_not_found';
+    public const string ERROR_UNAUTHORIZED = 'unauthorized_access';
+    public const string ERROR_VALIDATION = 'validation_failed';
+    public const string ERROR_UNKNOWN = 'unknown_error';
+}
+```
+

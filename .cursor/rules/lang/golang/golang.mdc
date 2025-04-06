@@ -1,0 +1,298 @@
+---
+description: Comprehensive Go (Golang) coding standards based on the Uber Go Style Guide
+globs: **/*.go
+related_files:
+  - path: golang-project-structure.mdc
+    description: Detailed guidelines for Go project folder structures
+---
+
+# Go (Golang) Coding Standards
+
+## Project Structure
+> **Note:** For comprehensive project structure guidelines, refer to [golang-project-structure.mdc](./golang-project-structure.mdc)
+
+- Organize code into logical packages
+- Package names should be lowercase, short, and not plural
+- Follow the standard Go project layout (cmd/, pkg/, internal/)
+- Use `/internal` for code not meant to be imported by other projects
+- Separate models, services, and controllers
+- Group related functionality in the same package
+- Implement repository pattern for data access
+- Organize tests in the same package as production code with `_test.go` suffix
+
+## Interfaces and Types
+
+### Interface Design
+- No pointers to interfaces: pass interfaces as values
+- Verify interface compliance at compile time: `var _ Interface = (*Implementation)(nil)`
+- Keep interfaces small and focused (ideally 1-3 methods)
+- Use interfaces at package boundaries for better testing
+- Design interfaces for consumers, not implementations
+- Don't export interfaces for concrete types with a single implementation
+
+### Method Receivers
+- Use value receivers for methods that don't modify the receiver
+- Use pointer receivers for methods that modify the receiver
+- Be consistent with receiver types for the same struct
+- Methods with value receivers can be called on pointers as well as values
+- Methods with pointer receivers can only be called on pointers or addressable values
+- If any method requires a pointer receiver, use pointer receivers for all methods
+
+### Type Assertions
+- Always use the "comma ok" idiom: `val, ok := x.(T)`
+- Don't use type assertions without checking the result
+- Use type switches for multiple potential types
+- Consider using the `errors.As` function for error type checking
+
+## Error Handling
+
+### Error Creation
+- Return errors instead of using panic
+- Create specialized error types for specific error cases
+- Implement Error() string method for custom error types
+- Use `errors.New` for simple errors
+- Add context when wrapping errors: `fmt.Errorf("doing X: %w", err)`
+- Use `%w` verb for error wrapping to preserve the original error
+
+### Error Naming
+- Prefix unexported error variables with `err`: `var errNotFound = errors.New("not found")`
+- Prefix exported error variables with `Err`: `var ErrNotFound = errors.New("not found")`
+- Use clear, specific error messages that describe what went wrong
+- Suffix error type names with "Error": `type NotFoundError struct {}`
+
+### Error Processing
+- Handle errors only once - don't log and return the same error
+- Check for specific errors with `errors.Is` and `errors.As`
+- Handle each error at the appropriate level of abstraction
+- Don't swallow errors silently
+- Return sentinel errors for expected error conditions
+- Use custom error types for rich error information
+
+## Data Safety
+
+### Slices and Maps
+- Copy slices and maps at boundaries to prevent unintended mutations
+- Don't store references to input slice/map arguments
+- Don't return internal slice/map state directly
+- Use `copy()` function for slices: `dst := make([]T, len(src)); copy(dst, src)`
+- For maps: `dst := make(map[K]V, len(src)); for k, v := range src { dst[k] = v }`
+- Return nil slices instead of empty slices
+
+### Mutexes and Locks
+- Use zero-value mutexes: `var mu sync.Mutex` over `mu := new(sync.Mutex)`
+- Don't embed mutexes in structs, use a named field: `mu sync.Mutex`
+- Always unlock mutexes with defer: `defer mu.Unlock()`
+- Lock for the smallest necessary scope
+- Consider using sync.RWMutex for read-heavy workloads
+- Document mutex relationships with fields they protect
+
+### Other Data Safety Practices
+- Start enums at one: `const ( First Type = iota + 1 )`
+- Avoid embedding types in public structs
+- Avoid mutable global variables
+- Use immutable data structures when possible
+- Use field tags in marshaled structs: `json:"name,omitempty"`
+- Avoid using built-in names like `error`, `string`, etc.
+
+## Concurrency
+
+### Goroutine Management
+- Don't create "fire-and-forget" goroutines
+- Always have a way to check errors from goroutines
+- Use WaitGroups to wait for goroutines: `var wg sync.WaitGroup`
+- Use context for cancellation
+- Use a done channel or other signaling mechanism
+- No goroutines in `init()`
+- Document the lifetime of goroutines
+- Handle panic recovery in long-running goroutines
+
+### Channel Usage
+- Use channels with size of one or unbuffered
+- Document whether a channel is closed by sender or receiver
+- Be clear about channel ownership (who closes it)
+- Use select with default case for non-blocking operations
+- Always handle the "channel closed" case
+- Consider buffered channels for producer-consumer patterns with known bounds
+
+### Synchronization
+- Use `defer` to clean up resources (files, locks)
+- Prefer channel-based communication over shared memory
+- Use `sync.Once` for one-time initialization
+- Use `go.uber.org/atomic` for atomic operations
+- Use `sync.Map` for concurrent map access
+- Consider higher-level concurrency patterns from `golang.org/x/sync`
+
+## Performance
+
+### Memory Allocation
+- Specify container capacity when known: `make([]T, 0, size)`
+- Reuse slices and maps when possible instead of creating new ones
+- Avoid repeated string-to-byte conversions: `[]byte("string")` creates a copy
+- Preallocate slices when appending in loops
+- Use `strings.Builder` for string concatenation
+- Consider using sync.Pool for frequently allocated objects
+
+### Conversion and Formatting
+- Prefer `strconv` over `fmt` for primitive conversions
+- Use `strconv.Itoa` instead of `fmt.Sprintf("%d", n)`
+- Use `strconv.FormatFloat` instead of `fmt.Sprintf("%f", f)`
+- Use `strconv.ParseInt` instead of `fmt.Sscanf`
+- Avoid using reflection when possible
+- Use raw string literals to avoid escaping: `` `like this` ``
+
+### Other Performance Tips
+- Profile before optimizing
+- Use benchmarks to measure performance
+- Minimize allocations in hot paths
+- Consider caching expensive operations
+- Batch database operations when possible
+- Use connection pooling for databases and HTTP clients
+
+## Code Style
+
+### Code Formatting
+- Run `gofmt` or `goimports` on all code
+- Keep lines under 99 characters
+- Use standard Go spacing conventions
+- Indent with tabs, align with spaces
+- No trailing whitespace
+- One blank line between functions
+- Align error handling blocks vertically for readability
+
+### Declarations and Grouping
+- Group similar declarations (const, var) together
+- Order imports: standard library, then third-party, then local
+- Import packages in alphabetical order within groups
+- Organize functions in rough call order
+- Group methods by receiver
+- Place related functions together
+- Use blank lines to separate logical sections
+
+### Control Flow
+- Reduce nesting with early returns
+- Avoid unnecessary else blocks
+- Prefer positive conditions for better readability
+- Keep functions small and focused
+- Limit function complexity
+- Use switch statements over long if-else chains
+- Prefer for-range loops over traditional for loops
+
+### Naming and Declarations
+- Use `var` for zero-value structs and slices
+- Prefix unexported globals with `_`: `var _defaultPort = 8080`
+- Use `:=` when explicitly setting values
+- Reduce variable scope where possible
+- Use named returns only when it improves clarity
+- Follow Go naming conventions:
+  - Acronyms in all caps: `HTTPServer` not `HttpServer`
+  - Getter methods without 'Get' prefix: `user.Name()` not `user.GetName()`
+  - Mixed caps for function names: `AddUser` not `add_user`
+  - Short, clear variable names: `i` for indexes, `err` for errors
+
+## Initialization
+
+### Struct Initialization
+- Specify field names when initializing structs: `User{Name: "John", Age: 30}`
+- Omit zero-value fields in struct literals
+- Use `var u User` for zero-value structs
+- Use `&User{}` instead of `new(User)` for struct references
+- Initialize all required fields to avoid zero-value bugs
+- Use constructor functions for complex initialization
+
+### Maps and Slices
+- Use `make` for maps, `map literals` for fixed elements
+- Initialize maps with capacity hint when size is known
+- Use `var s []string` for nil slices
+- Use `s := make([]string, 0, capacity)` when preallocation helps
+- Return nil slices instead of empty slices
+- Check slice bounds before accessing elements
+
+### Initialization Patterns
+- Use functional options pattern for optional configurations
+- Implement Builder pattern for complex object creation
+- Use factory functions for interface implementations
+- Initialize dependencies in main or with dependency injection
+- Avoid `init()` functions when possible
+- If using `init()`, keep it simple and deterministic
+
+## Testing
+
+### Test Structure
+- Use table-driven tests for similar test cases
+- Name test tables clearly: `tests := []struct{ name, input, want string }{}`
+- Structure tests as "arrange, act, assert"
+- Use meaningful test names: `TestValidateEmail_InvalidFormat`
+- Test error cases as well as success cases
+- Use subtests with `t.Run("case name", func(t *testing.T) {...})`
+
+### Test Practices
+- Write tests before fixing bugs
+- Test package APIs, not internals
+- Use test fixtures for complex test data
+- Mock external dependencies
+- Use `t.Helper()` for helper functions
+- Test boundary conditions and edge cases
+- Aim for high test coverage but focus on critical paths
+- Use `testing.B` for benchmarks
+- Use `go test -race` to detect race conditions
+
+### Mocking and Testability
+- Design for testability
+- Use interfaces at package boundaries
+- Create test doubles implementing interfaces
+- Use `github.com/golang/mock/gomock` for complex mocks
+- Consider table-driven subtests for parametrized testing
+- Use dependency injection for better testability
+
+## Documentation
+
+### Package Documentation
+- Write a package comment for every package
+- Document the package's purpose and usage
+- Start package comments with `// Package foo ...`
+- Include examples for public packages
+- Document any package-level side effects
+- Avoid repeating information in multiple places
+
+### Function Documentation
+- Document all exported functions, types, and variables
+- Start function comments with the function name
+- Focus on what the function does, not how
+- Document parameters and return values
+- Document any side effects or special considerations
+- Include examples for complex functions
+
+### Code Documentation
+- Document non-obvious design decisions
+- Explain why, not what (code should explain what)
+- Document known limitations
+- Update documentation when changing code
+- Document concurrency guarantees
+- Provide context for future maintainers
+
+## Tools and Linting
+
+### Development Tools
+- Use goimports on save
+- Run golint and go vet regularly
+- Consider golangci-lint as a linter aggregator
+- Use errcheck to find unchecked errors
+- Use staticcheck for additional static analysis
+- Use go mod tidy to clean up dependencies
+
+### CI/CD Practices
+- Run tests on every commit
+- Use race detector in CI
+- Check test coverage
+- Run linters in CI
+- Enforce coding standards automatically
+- Use semantic versioning for releases
+- Document breaking changes
+
+### Deployment
+- Use proper logging in production
+- Implement graceful shutdown
+- Handle signals properly
+- Use environment variables for configuration
+- Monitor application performance
+- Implement proper health checks

@@ -1,0 +1,250 @@
+---
+description: "Follow this rule when working with PHP 7.4 to leverage its specific features and follow best practices for typed properties, arrow functions, and other PHP 7.4 capabilities"
+globs: **/*.php
+parent_file: php.mdc
+---
+
+# PHP 7.4 Features and Best Practices
+
+## Overview
+
+PHP 7.4 introduced significant new features and improvements. This document outlines the key features of PHP 7.4 and how to effectively use them in your code.
+
+## Key Language Features
+
+### Typed Properties
+
+PHP 7.4 adds support for typed class properties, allowing you to declare the type of class properties directly.
+
+```php
+class User {
+    public int $id;
+    public string $name;
+    private ?string $email = null;
+    protected bool $active = true;
+}
+```
+
+**Best Practices:**
+- Use typed properties to improve code reliability and self-documentation
+- Prefer nullable types (`?string`) over setting default values of `null`
+- Combine type declarations with visibility modifiers appropriately
+- Be aware that property types are enforced at runtime
+
+### Arrow Functions
+
+Arrow functions provide a more concise syntax for simple one-line functions, especially useful for callbacks.
+
+```php
+// Traditional anonymous function
+$numbers = array_map(function ($n) {
+    return $n * 2;
+}, $numbers);
+
+// Arrow function
+$numbers = array_map(fn ($n) => $n * 2, $numbers);
+```
+
+**Best Practices:**
+- Use arrow functions for simple, single-expression callbacks
+- Arrow functions automatically capture variables from the parent scope (no need for `use`)
+- Maintain readability - if the logic is complex, use a traditional function
+- Arrow functions are ideal for array operations like `array_map`, `array_filter`, etc.
+
+### Null Coalescing Assignment Operator (??=)
+
+The null coalescing assignment operator combines the null coalescing operator with assignment.
+
+```php
+// Before PHP 7.4
+if (!isset($data['key'])) {
+    $data['key'] = 'default';
+}
+
+// PHP 7.4
+$data['key'] ??= 'default';
+```
+
+**Best Practices:**
+- Use `??=` to simplify default value assignments
+- Combine with null coalescing operator (`??`) for complex expressions
+- Great for initializing configuration values or setting defaults
+
+### Spread Operator in Arrays
+
+PHP 7.4 allows using the spread operator (`...`) in array expressions.
+
+```php
+$parts = ['apple', 'pear'];
+$fruits = ['banana', 'orange', ...$parts, 'watermelon'];
+// $fruits is ['banana', 'orange', 'apple', 'pear', 'watermelon']
+```
+
+**Best Practices:**
+- Use for merging arrays in a more readable way
+- Helpful for config array merging and defaults
+- Can be used with unpacking in function arguments
+- More expressive than `array_merge()` for simple cases
+
+### Numeric Literal Separator
+
+Underscores can be used as visual separators in numeric literals.
+
+```php
+$million = 1_000_000;
+$billion = 1_000_000_000;
+$tiny = 0.000_001;
+```
+
+**Best Practices:**
+- Use separators for better readability of large numbers
+- Particularly useful for constants and magic numbers
+- Position separators consistently (typically every 3 digits)
+
+### Weak References
+
+Weak references allow referencing objects without preventing them from being garbage collected.
+
+```php
+$object = new stdClass;
+$weakref = WeakReference::create($object);
+
+// Later
+if ($weakref->get()) {
+    // Object still exists
+} else {
+    // Object has been garbage collected
+}
+```
+
+**Best Practices:**
+- Use for cache implementations to prevent memory leaks
+- Helpful for observer patterns without memory management issues
+- Use as a replacement for resource pools that need to track live objects
+- Don't use for critical references that must remain valid
+
+### Covariant Returns and Contravariant Parameters
+
+PHP 7.4 improved type variance in inheritance, allowing more flexible return types and parameter types in child classes.
+
+```php
+class ParentClass {
+    public function process(ChildType $param): ParentType {
+        // ...
+    }
+}
+
+class ChildClass extends ParentClass {
+    // More specific return type (covariance)
+    // More general parameter type (contravariance)
+    public function process(ParentType $param): ChildType {
+        // ...
+    }
+}
+```
+
+**Best Practices:**
+- Use covariant returns to return more specific types in child classes
+- Use contravariant parameters to accept more general types in child classes
+- Provides better type safety while maintaining flexibility in class hierarchies
+- Especially useful for fluent interfaces and method chaining
+
+### Type Improvements
+
+PHP 7.4 adds improved type checking capabilities.
+
+```php
+// Use more precise types for improved type checking
+function processData(iterable $data, callable $callback): array {
+    // ...
+}
+```
+
+**Best Practices:**
+- Add type declarations to all new methods and functions
+- Use `callable` type for callback functions
+- Use `iterable` type for any collection that needs to be iterated
+- Add return types to improve self-documentation
+
+## Deprecations and Backwards Compatibility
+
+PHP 7.4 deprecates several features that were removed in PHP 8.0:
+
+- The `curly brace` syntax for accessing array elements and string offsets
+- `array_key_exists()` with objects (use `isset()` or `property_exists()`)
+- `magic_quotes_runtime` directive
+- `allow_url_include` directive
+- Nested ternary operators without parentheses
+
+**Best Practices:**
+- Avoid using deprecated features to ensure forward compatibility
+- Update legacy code to use recommended alternatives
+- Use linting tools to catch deprecation warnings
+- Run your codebase with deprecation warnings enabled during development
+
+## Performance Considerations
+
+PHP 7.4 includes several performance improvements:
+
+- Preloading for improved application startup time
+- Cached opcodes for typed properties
+- Optimized hash tables
+- Faster method calls
+
+**Best Practices:**
+- Enable OPcache and use preloading for production servers
+- Use PHP 7.4's preloading feature for frequently used classes
+- Profile your application to identify bottlenecks
+- Take advantage of typed properties for both code quality and performance
+
+## Example: Putting It All Together
+
+Here's an example class that leverages PHP 7.4 features:
+
+```php
+class ProductRepository
+{
+    private PDO $database;
+    private ?array $cache = null;
+    private int $cacheExpiry = 3600;
+    
+    public function __construct(PDO $database)
+    {
+        $this->database = $database;
+    }
+    
+    public function findAll(): array
+    {
+        // Null coalescing assignment
+        $this->cache ??= $this->loadAllProducts();
+        return $this->cache;
+    }
+    
+    public function findByCategories(array $categories): array
+    {
+        $products = $this->findAll();
+        
+        // Arrow function
+        return array_filter($products, fn($product) => 
+            in_array($product->category, $categories)
+        );
+    }
+    
+    public function getMostExpensive(int $limit = 5): array
+    {
+        $products = $this->findAll();
+        
+        // Sort using arrow function
+        usort($products, fn($a, $b) => $b->price <=> $a->price);
+        
+        // Spread operator with array slice
+        return [...array_slice($products, 0, $limit)];
+    }
+    
+    private function loadAllProducts(): array
+    {
+        // Implementation
+    }
+}
+```
+
