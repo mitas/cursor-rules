@@ -33,11 +33,20 @@ globs: **/*.py, src/**/*.py, tests/**/*.py
         args: [--fix]
       - id: ruff-format
   ```
-- Configure Ruff in pyproject.toml:
+- Configure all tools in pyproject.toml:
   ```toml
-  [tool.ruff]
+  [tool.black]
   line-length = 79
-  target-version = "py311"
+  target-version = ["py313"]
+  include = '\.pyi?$'
+
+  [tool.ruff]
+  target-version = "py313"
+  line-length = 79
+  
+  [tool.ruff.lint]
+  select = ["E", "F", "B", "I"]
+  ignore = ["E203", "E501"]  # Ignore whitespace before ':' and line length
   ```
 - Run Black and Ruff together: `uv run bash -c "ruff check --fix . && black ."`
 
@@ -66,32 +75,31 @@ globs: **/*.py, src/**/*.py, tests/**/*.py
 - Use `TypeVar` for generic types
 - Define custom types in `types.py`
 - Use `Protocol` for duck typing
-- If mypy.ini doesn't exist, create one with the following configuration:
-  ```ini
-  [mypy]
-  python_version = 3.13
-  disallow_untyped_defs = True
-  disallow_incomplete_defs = True
-  check_untyped_defs = True
-  disallow_untyped_decorators = True
-  no_implicit_optional = True
-  strict_optional = True
-  warn_redundant_casts = True
-  warn_return_any = True
-  warn_unused_ignores = True
-  warn_no_return = True
-  warn_unreachable = True
+- Configure mypy in pyproject.toml:
+  ```toml
+  [tool.mypy]
+  python_version = "3.13"
+  disallow_untyped_defs = true
+  disallow_incomplete_defs = true
+  check_untyped_defs = true
+  disallow_untyped_decorators = true
+  no_implicit_optional = true
+  strict_optional = true
+  warn_redundant_casts = true
+  warn_return_any = true
+  warn_unused_ignores = true
+  warn_no_return = true
+  warn_unreachable = true
+  ignore_missing_imports = true
 
-  # Ignore missing imports globally
-  ignore_missing_imports = True
+  # Override rules for project-specific libraries
+  [[tool.mypy.overrides]]
+  module = "lxml.*"
+  ignore_missing_imports = true
 
-  # Add ignore rules for project-specific libraries
-  # Replace these examples with your actual project dependencies:
-  [mypy-lxml.*]
-  ignore_missing_imports = True
-
-  [mypy-jsonlines.*]
-  ignore_missing_imports = True
+  [[tool.mypy.overrides]]
+  module = "jsonlines.*"
+  ignore_missing_imports = true
   ```
 
 ## Flask Structure
@@ -133,6 +141,13 @@ globs: **/*.py, src/**/*.py, tests/**/*.py
 - Implement proper fixtures
 - Use proper mocking with pytest-mock
 - Test all error scenarios
+- Configure pytest in pyproject.toml:
+  ```toml
+  [tool.pytest.ini_options]
+  testpaths = ["tests"]
+  python_files = "test_*.py"
+  python_functions = "test_*"
+  ```
 
 ## Security
 - Use HTTPS in production
@@ -184,3 +199,49 @@ globs: **/*.py, src/**/*.py, tests/**/*.py
 - Separate dev dependencies in pyproject.toml
 - Regularly update dependencies with: `uv add --upgrade package`
 - Check for security vulnerabilities
+- Example pyproject.toml structure:
+  ```toml
+  [project]
+  name = "your-package"
+  version = "0.1.0"
+  description = "Your package description"
+  readme = "README.md"
+  requires-python = ">=3.13"
+  license = {text = "MIT"}
+  authors = [
+      {name = "Your Name", email = "your.email@example.com"}
+  ]
+  dependencies = [
+      "flask>=2.3.0",
+      "sqlalchemy>=2.0.0",
+  ]
+
+  [project.optional-dependencies]
+  dev = [
+      "pytest>=8.0.0",
+      "pytest-cov>=4.1.0",
+      "black>=24.0.0",
+      "ruff>=0.5.0",
+      "mypy>=1.9.0",
+  ]
+  
+  [build-system]
+  requires = ["hatchling"]
+  build-backend = "hatchling.build"
+  
+  # All tool configurations in one file
+  [tool.black]
+  line-length = 79
+  target-version = ["py313"]
+  
+  [tool.ruff]
+  target-version = "py313"
+  line-length = 79
+  
+  [tool.mypy]
+  python_version = "3.13"
+  disallow_untyped_defs = true
+  
+  [tool.pytest.ini_options]
+  testpaths = ["tests"]
+  ```
