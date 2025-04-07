@@ -79,7 +79,6 @@ fi
 download_file() {
   local rule_path="$1"
   local target_file="$RULES_DIR/$rule_path"
-  local dir_path=$(dirname "$target_file")
 
   # Check if file exists and we're not in overwrite mode
   if [ -f "$target_file" ] && [ "$OVERWRITE" = false ]; then
@@ -89,9 +88,6 @@ download_file() {
 
   local url="$RAW_URL/$rule_path"
   echo -e "${BLUE}📦 Downloading $rule_path${RESET}"
-
-  # Create directory if it doesn't exist
-  mkdir -p "$dir_path"
 
   # Download file
   local status=$(curl -s -o "$target_file" -w "%{http_code}" "$url")
@@ -109,42 +105,21 @@ download_rules() {
   echo -e "${BLUE}📦 Downloading rules to $RULES_DIR${RESET}"
 
   RULES=(
-    # Core rules
-    "core/clean-code.mdc"
-    "core/coding-principles.mdc"
-    "core/cursor-rules.mdc"
-    "core/emoji-usage.mdc"
-    "core/gitflow.mdc"
-
-    # Language-specific rules
-    "lang/cpp/cpp.mdc"
-    "lang/css/tailwind.mdc"
-    "lang/golang/golang.mdc"
-    "lang/golang/golang-project-structure.mdc"
-    "lang/markdown/formatting.mdc"
-    "lang/node/node-express.mdc"
-    "lang/php/php.mdc"
-    "lang/php/php-7.4.mdc"
-    "lang/php/php-8.0.mdc"
-    "lang/php/php-8.1.mdc"
-    "lang/php/php-8.2.mdc"
-    "lang/php/php-8.3.mdc"
-    "lang/php/phpunit-test.mdc"
-    "lang/python/fastapi.mdc"
-    "lang/python/python.mdc"
-    "lang/react/nextjs.mdc"
-    "lang/react/react.mdc"
-    "lang/sql/database.mdc"
-    "lang/svelte/svelte.mdc"
-    "lang/typescript/typescript.mdc"
-    "lang/vue/vue.mdc"
-
-    # Tools rules
-    "tools/commit-message.mdc"
-    "tools/directory-listing.mdc"
-    "tools/git.mdc"
-
-    # Local rules would be added here if any exist
+    # All rules in flat structure
+    "clean-code.mdc"
+    "coding-principles.mdc"
+    "cursor-rules.mdc"
+    "directory-listing.mdc"
+    "golang-project-structure.mdc"
+    "golang.mdc"
+    "php-7.4.mdc"
+    "php-8.0.mdc"
+    "php-8.1.mdc"
+    "php-8.2.mdc"
+    "php-8.3.mdc"
+    "php.mdc"
+    "phpunit-test.mdc"
+    "python.mdc"
   )
 
   # Count rules

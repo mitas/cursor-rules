@@ -43,57 +43,47 @@ After running the script:
 
 ## 📁 Rules Organization
 
-Rules are organized in specific directories:
-
-| Directory   | Purpose                                         |
-| ----------- | ----------------------------------------------- |
-| `core/`     | Core rules for Cursor behavior and rules system |
-| `local/`    | Personal rules (gitignored)                     |
-| `global/`   | Rules applied to every context                  |
-| `overview/` | Project overviews and descriptions              |
-| `testing/`  | Testing approach guidelines                     |
-| `tools/`    | OS-specific utilities and common tools          |
-| `lang/`      | Language-specific rules in subdirectories       |
+All rules are now stored directly in the `.cursor/rules/` directory using a flat structure for simplicity and ease of management.
 
 ### Available Rules
 
 #### Core Rules
 
-- `core/clean-code.mdc` - Code Quality Guidelines
-- `core/coding-principles.mdc` - Code Quality Principles
-- `core/cursor-rules.mdc` - Cursor Rules Format
-- `core/emoji-usage.mdc` - Emoji Usage Guidelines
-- `core/gitflow.mdc` - Gitflow Workflow Rules
+- `clean-code.mdc` - Code Quality Guidelines
+- `coding-principles.mdc` - Code Quality Principles
+- `cursor-rules.mdc` - Cursor Rules Format
+- `emoji-usage.mdc` - Emoji Usage Guidelines
+- `gitflow.mdc` - Gitflow Workflow Rules
 
 #### Tools Rules
 
-- `tools/commit-message.mdc` - Semantic Commit Messages
-- `tools/directory-listing.mdc` - Directory Listing Guidelines
-- `tools/git.mdc` - Git Command Usage
+- `commit-message.mdc` - Semantic Commit Messages
+- `directory-listing.mdc` - Directory Listing Guidelines
+- `git.mdc` - Git Command Usage
 
 #### Language-Specific Rules
 
-- `lang/cpp/cpp.mdc` - C++ Programming Guidelines
-- `lang/css/tailwind.mdc` - Tailwind CSS Best Practices
-- `lang/golang/golang.mdc` - Go (Golang) Coding Standards
-- `lang/golang/golang-project-structure.mdc` - Go Project Structure Best Practices
-- `lang/markdown/formatting.mdc` - Markdown Formatting Standards
-- `lang/node/node-express.mdc` - Node.js and Express.js Best Practices
-- `lang/php/php.mdc` - PHP Coding Standards and Best Practices
-- `lang/php/php-7.4.mdc` - PHP 7.4 Features and Best Practices
-- `lang/php/php-8.0.mdc` - PHP 8.0 Features and Best Practices
-- `lang/php/php-8.1.mdc` - PHP 8.1 Features and Best Practices
-- `lang/php/php-8.2.mdc` - PHP 8.2 Features and Best Practices
-- `lang/php/php-8.3.mdc` - PHP 8.3 Features and Best Practices
-- `lang/php/phpunit-test.mdc` - PHPUnit Testing Best Practices
-- `lang/python/fastapi.mdc` - FastAPI Best Practices
-- `lang/python/python.mdc` - Python Best Practices
-- `lang/react/nextjs.mdc` - Next.js Best Practices
-- `lang/react/react.mdc` - React Best Practices
-- `lang/sql/database.mdc` - Database Best Practices
-- `lang/svelte/svelte.mdc` - Svelte Best Practices
-- `lang/typescript/typescript.mdc` - TypeScript Best Practices
-- `lang/vue/vue.mdc` - Vue.js Best Practices
+- `cpp.mdc` - C++ Programming Guidelines
+- `tailwind.mdc` - Tailwind CSS Best Practices
+- `golang.mdc` - Go (Golang) Coding Standards
+- `golang-project-structure.mdc` - Go Project Structure Best Practices
+- `formatting.mdc` - Markdown Formatting Standards
+- `node-express.mdc` - Node.js and Express.js Best Practices
+- `php.mdc` - PHP Coding Standards and Best Practices
+- `php-7.4.mdc` - PHP 7.4 Features and Best Practices
+- `php-8.0.mdc` - PHP 8.0 Features and Best Practices
+- `php-8.1.mdc` - PHP 8.1 Features and Best Practices
+- `php-8.2.mdc` - PHP 8.2 Features and Best Practices
+- `php-8.3.mdc` - PHP 8.3 Features and Best Practices
+- `phpunit-test.mdc` - PHPUnit Testing Best Practices
+- `fastapi.mdc` - FastAPI Best Practices
+- `python.mdc` - Python Best Practices
+- `nextjs.mdc` - Next.js Best Practices
+- `react.mdc` - React Best Practices
+- `database.mdc` - Database Best Practices
+- `svelte.mdc` - Svelte Best Practices
+- `typescript.mdc` - TypeScript Best Practices
+- `vue.mdc` - Vue.js Best Practices
 
 
 ## ⚙️ Configuration
@@ -136,13 +126,11 @@ This prevents rules from being embedded in the index while they're changing rapi
 
 ### Rule Synchronization
 
-When creating or deleting rules (excluding rules in the `overview/` directory):
+When creating or deleting rules:
 
 1. Update the `RULES` array in the `apply-rules.sh` script to keep it synchronized
-2. Follow the existing categorization structure and alphabetical order
+2. Maintain alphabetical order in the array for easy management
 3. Commit both the rule changes and script updates together
-
-See the [rules-synchronization.mdc](.cursor/rules/overview/rules-synchronization.mdc) file for more details.
 
 ### After Rules Update
 
