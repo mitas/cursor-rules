@@ -5,294 +5,268 @@ alwaysApply: false
 parent_file: php.mdc
 ---
 
-# PHPUnit Testing Best Practices
+# PHPUnit Testing Rules
 
-## Context
+## Test Structure Requirements
 
-- PHPUnit is the de facto standard for testing PHP applications
-- Well-structured tests improve code quality and prevent regressions
-- Tests should be readable, maintainable, and follow consistent patterns
-- Modern PHP code should leverage type hints, return types, and other language features
+```php
+// Always extend TestCase
+class ProductServiceTest extends TestCase 
+{
+    // Use typed properties
+    private ProductService $subject;
+    private MockObject $repository;
+    
+    // Always use return type void for setUp/tearDown
+    protected function setUp(): void 
+    {
+        // Create mocks using createMock()
+        $this->repository = $this->createMock(RepositoryInterface::class);
+        $this->subject = new ProductService($this->repository);
+    }
+    
+    // Test methods: prefix with test or use @test annotation
+    // Use descriptive method names
+    /** @test */
+    public function getProductReturnsCorrectDataForValidId(): void 
+    {
+        // Always follow Arrange-Act-Assert pattern
+        
+        // Arrange
+        $id = 'valid-id';
+        $expected = ['id' => 'valid-id', 'name' => 'Product'];
+        
+        $this->repository->method('findById')
+            ->with($id)
+            ->willReturn($expected);
+        
+        // Act
+        $result = $this->subject->getProduct($id);
+        
+        // Assert - use specific assertions
+        $this->assertSame($expected, $result);
+    }
+}
+```
 
-## Version Detection
+## Refactoring Guidelines
 
-- First, automatically determine PHP and PHPUnit versions from the project's composer.json:
-  ```php
-  // Function to extract version constraints from composer.json
-  function getVersionsFromComposer() {
-      $composerPath = __DIR__ . '/composer.json';
-      // Try looking up the directory tree for composer.json
-      for ($i = 0; $i < 5 && !file_exists($composerPath); $i++) {
-          $composerPath = dirname(__DIR__, $i+1) . '/composer.json';
-      }
-      
-      if (!file_exists($composerPath)) {
-          return ['php' => '>=7.2', 'phpunit' => '^6.0']; // Default fallback
-      }
-      
-      $composer = json_decode(file_get_contents($composerPath), true);
-      $phpVersion = $composer['require']['php'] ?? '>=7.2';
-      $phpunitVersion = $composer['require-dev']['phpunit/phpunit'] ?? '^6.0';
-      
-      return ['php' => $phpVersion, 'phpunit' => $phpunitVersion];
-  }
-  
-  $versions = getVersionsFromComposer();
-  ```
-- Adjust test syntax and features based on detected PHP and PHPUnit versions
-- For PHPUnit 6.x (detected in your project):
-  - Use namespaced class names (\PHPUnit\Framework\TestCase)
-  - Use expectException() instead of setExpectedException()
-  - Use type hints where supported by your PHP version
+When refactoring tests, use this incremental approach:
 
-## Critical rules
+1. Create a refactoring plan before starting
+2. Break changes into logical steps:
+   ```
+   Step 1: Extract hardcoded strings to constants
+   Step 2: Create required mocks
+   Step 3: Fix assertion methods
+   Step 4: Implement proper exception testing
+   ```
+3. Complete one step at a time before moving to the next
 
-- Use namespaces that match the directory structure of the code being tested
-- Write test classes that extend \PHPUnit\Framework\TestCase
-- Use descriptive test class names that end with "Test"
-- Use descriptive test method names that clearly explain what is being tested
-- Prefix test methods with "test" or use @test annotation
-- Test methods should have void return type (for PHP 7.1+)
-- Use setUp() and tearDown() methods for common initialization and cleanup
-- Test one thing per test method
-- Use assertions appropriate for the data type being tested
-- Follow Arrange-Act-Assert (AAA) pattern for test structure:
-  - **Arrange**: Set up the test data and dependencies
-  - **Act**: Perform the action being tested
-  - **Assert**: Verify the expected outcome
-- Use test doubles (mocks, stubs, spies) when appropriate for isolation
-- Keep tests independent and isolated from each other
+## Mock Objects
 
-## Mocking Strategies
+```php
+// Good - explicit mock creation and configuration
+$repository = $this->createMock(RepositoryInterface::class);
+$repository->method('findById')
+    ->with('valid-id')
+    ->willReturn(['id' => 'valid-id', 'name' => 'Product']);
 
-- Use dependency injection to make code testable
-- Create mocks with the appropriate PHPUnit version syntax:
-  - For PHPUnit 6+: `$this->createMock(ClassToMock::class)`
-- Set up mock method expectations clearly:
-  ```php
-  $mock->method('methodName')
-      ->with($this->equalTo('expectedArg'))
-      ->willReturn('mockResponse');
-  ```
-- Only mock what you need to control the test path
-- Document mock objects with typehints and docblocks:
-  ```php
-  /** @var \PHPUnit\Framework\MockObject\MockObject|ClassName */
-  private $mockObject;
-  ```
+// Bad - unclear expectations
+$repository = $this->createMock(Repository::class);
+$repository->expects($this->any())
+    ->method('findById')
+    ->willReturn($data);
+```
 
-## Test Organization
+## Data Providers
 
-- Group related test methods within the same test class
-- Use data providers for testing multiple input variations:
-  ```php
-  /**
-   * @dataProvider provideTestCases
-   */
-  public function testMethod($input, $expected): void
-  {
-      $this->assertSame($expected, $this->subject->method($input));
-  }
-  
-  public function provideTestCases(): array
-  {
-      return [
-          'case description' => ['input value', 'expected result'],
-          // More test cases...
-      ];
-  }
-  ```
-- Use appropriate annotations to document test coverage and organization:
-  - `@covers` to specify what class/method is being tested
-  - `@group` to categorize tests for selective running
-  - `@dataProvider` to link data provider methods
+```php
+/** @test */
+/** @dataProvider provideProductData */
+public function calculateTotalPriceReturnsCorrectValue(
+    array $product, 
+    int $quantity, 
+    float $expectedTotal
+): void {
+    $this->assertSame(
+        $expectedTotal, 
+        $this->calculator->calculateTotal($product, $quantity)
+    );
+}
 
-## Assertion Best Practices
+public function provideProductData(): array
+{
+    return [
+        'single item' => [
+            ['price' => 10.00], 
+            1, 
+            10.00
+        ],
+        'multiple items' => [
+            ['price' => 10.00], 
+            3, 
+            30.00
+        ],
+    ];
+}
+```
 
-- Use specific assertions rather than generic ones:
-  - Use `assertSame()` instead of `assertEquals()` for strict comparison
-  - Use `assertStringContainsString()` instead of `assertContains()` for strings (PHPUnit 7.5+)
-  - Use `assertCount()` instead of `assertEquals(count($x), $y)`
-- Include descriptive failure messages as the last argument to assertions
-- Test both positive and negative cases
-- Test edge cases and boundaries
-- For exceptions, use the modern expectException pattern:
-  ```php
-  $this->expectException(ExceptionClass::class);
-  $this->expectExceptionMessage('Expected message');
-  $subject->methodThatThrows();
-  ```
+## Assertions
+
+```php
+// Use specific assertions
+$this->assertSame($expected, $actual); // Instead of assertEquals
+$this->assertCount(3, $items);         // Instead of assertEquals(3, count($items))
+$this->assertArrayHasKey('id', $data); // Instead of isset($data['id'])
+
+// Testing exceptions
+$this->expectException(NotFoundException::class);
+$this->expectExceptionMessage('Product not found');
+$this->subject->getProduct('invalid-id');
+```
+
+## Dead Code Detection
+
+```php
+// Signs of dead code to identify and remove:
+// 1. Unused variables
+$value = $this->calculateValue(); // Never used
+
+// 2. Unreachable code
+return $result;
+$this->doSomething(); // Never executed
+
+// 3. Unused private methods
+private function formatData($data) 
+{
+    // This method is never called
+}
+
+// 4. Redundant assertions
+$this->assertTrue(true);
+$this->assertEquals(1, 1);
+```
 
 ## Examples
 
 <example type="valid">
 <?php
 
-namespace Lpp\Product\Tests\Unit;
-
 use PHPUnit\Framework\TestCase;
-use Lpp\Product\ProductService;
-use Lpp\Product\Repository\ProductRepositoryInterface;
-use Lpp\Product\Exception\ProductNotFoundException;
+use App\Service\ProductService;
+use App\Repository\ProductRepositoryInterface;
+use App\Exception\ProductNotFoundException;
 
-/**
- * @covers \Lpp\Product\ProductService
- */
 class ProductServiceTest extends TestCase
 {
-    /**
-     * @var ProductService
-     */
-    private $subject;
-    
-    /**
-     * @var ProductRepositoryInterface|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $productRepository;
+    private ProductService $subject;
+    private ProductRepositoryInterface $repository;
     
     protected function setUp(): void
     {
-        $this->productRepository = $this->createMock(ProductRepositoryInterface::class);
-        $this->subject = new ProductService($this->productRepository);
+        $this->repository = $this->createMock(ProductRepositoryInterface::class);
+        $this->subject = new ProductService($this->repository);
     }
     
-    /**
-     * @test
-     * @dataProvider validProductIdsProvider
-     */
-    public function getProductShouldReturnProductForValidId(string $productId, array $productData): void
+    /** @test */
+    public function getProductReturnsDataForValidId(): void
     {
         // Arrange
-        $this->productRepository->method('findById')
-            ->with($this->equalTo($productId))
+        $id = 'valid-id';
+        $productData = ['id' => 'valid-id', 'name' => 'Test Product'];
+        
+        $this->repository->method('findById')
+            ->with($id)
             ->willReturn($productData);
             
         // Act
-        $result = $this->subject->getProduct($productId);
+        $result = $this->subject->getProduct($id);
         
         // Assert
-        $this->assertSame($productData, $result, "Product data should match repository data");
-        $this->assertArrayHasKey('name', $result, "Product data should contain name");
+        $this->assertSame($productData, $result);
+        $this->assertArrayHasKey('name', $result);
     }
     
-    /**
-     * @test
-     */
-    public function getProductShouldThrowExceptionForInvalidId(): void
+    /** @test */
+    public function getProductThrowsExceptionForInvalidId(): void
     {
         // Arrange
-        $invalidId = 'invalid-id';
-        $this->productRepository->method('findById')
-            ->with($this->equalTo($invalidId))
+        $id = 'invalid-id';
+        
+        $this->repository->method('findById')
+            ->with($id)
             ->willReturn(null);
             
         // Assert expectation
         $this->expectException(ProductNotFoundException::class);
-        $this->expectExceptionMessage("Product with ID {$invalidId} not found");
         
         // Act
-        $this->subject->getProduct($invalidId);
+        $this->subject->getProduct($id);
     }
     
-    /**
-     * @return array
-     */
-    public function validProductIdsProvider(): array
+    /** @test */
+    /** @dataProvider productDataProvider */
+    public function calculatePriceReturnsCorrectTotal(
+        array $product,
+        int $quantity,
+        float $expectedTotal
+    ): void {
+        // Act
+        $result = $this->subject->calculatePrice($product, $quantity);
+        
+        // Assert
+        $this->assertSame($expectedTotal, $result);
+    }
+    
+    public function productDataProvider(): array
     {
         return [
-            'simple product' => [
-                'product-1', 
-                ['id' => 'product-1', 'name' => 'Test Product', 'price' => 19.99]
+            'single product' => [
+                ['price' => 10.00], 
+                1, 
+                10.00
             ],
-            'product with options' => [
-                'product-2', 
-                ['id' => 'product-2', 'name' => 'Test Product with Options', 'price' => 29.99, 'options' => ['color' => 'blue']]
+            'multiple quantity' => [
+                ['price' => 10.00], 
+                3, 
+                30.00
             ],
         ];
-    }
-    
-    protected function tearDown(): void
-    {
-        $this->subject = null;
-        $this->productRepository = null;
     }
 }
 </example>
 
 <example type="invalid">
 <?php
-// Missing or incorrect namespace
-class SomeProductTest extends PHPUnit_Framework_TestCase // Outdated base class
+class ProductTest extends PHPUnit_Framework_TestCase
 {
-    // Missing typed properties
     private $service;
     private $repo;
     
-    // Missing return type
     public function setUp() 
     {
-        // No clear mocking strategy, using real objects
         $this->repo = new ProductRepository();
         $this->service = new ProductService($this->repo);
     }
     
-    // Missing test prefix and unclear method name
     public function productGetWorking()
     {
-        // No clear Arrange-Act-Assert pattern
         $product = $this->service->getProduct("123");
-        $this->assertTrue(is_array($product)); // Generic assertion
-        $this->assertTrue(isset($product["name"])); // Multiple assertions without clear purpose
+        $this->assertTrue(is_array($product));
+        $this->assertTrue(isset($product["name"]));
+        $this->assertEquals(123, $product["id"]);
+        $this->assertEquals("Test", $product["name"]);
     }
     
-    // Mixed test and helper methods
-    public function getSampleData()
-    {
-        return ["id" => "123", "name" => "Test"]; 
-    }
-    
-    // Old style exception testing
     public function testException()
     {
         try {
             $this->service->getProduct("invalid");
             $this->fail("Should have thrown exception");
         } catch (Exception $e) {
-            $this->assertTrue(true); // Meaningless assertion
+            $this->assertTrue(true);
         }
     }
-    
-    // No tearDown method
 }
 </example>
-
-## Testing Database Interactions
-
-When testing database interactions, consider the following best practices:
-
-- Use an in-memory database for tests when possible
-- Use transactions to roll back changes after tests
-- Isolate the database layer with proper abstractions
-- Use specific database-oriented assertions when applicable
-- Consider using a separate test database with known state
-
-## Specific PHP/PHPUnit Version Features
-
-### For PHP 7.2+ (Your project's minimum version)
-- Use the null coalescing operator (`??`)
-- Use scalar type hints and return types
-- Use the array spread operator
-
-### For PHPUnit 6.x (Your project's version)
-- Use namespaced class names (\PHPUnit\Framework\TestCase)
-- Use expectException() instead of setExpectedException()
-- Use createMock() instead of getMock()
-- Use annotations like @covers, @dataProvider, etc.
-- Properly typehint mock objects
-
-## Test Suite Organization
-
-- Place tests in a parallel directory structure to the code being tested
-- Use consistent file naming (e.g., ClassNameTest.php)
-- Group tests into appropriate suites using XML configuration or annotations
-- Separate unit tests from integration and functional tests
