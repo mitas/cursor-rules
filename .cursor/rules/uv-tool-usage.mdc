@@ -1,0 +1,139 @@
+---
+description: Guidelines for using uv, the fast Python package manager and interpreter manager written in Rust
+globs: **/*.py, **/*pyproject.toml
+---
+
+# UV Tool Usage
+
+## Basic Commands
+- Create virtual environments with: `uv venv` instead of `python -m venv`
+- Install packages with: `uv pip install package` instead of `pip install package`
+- Run Python scripts with: `uv run python script.py` instead of `python script.py`
+- Initialize a new project: `uv init myproject`
+- Generate lockfile: `uv lock`
+- Install dependencies from lockfile: `uv sync`
+- Run commands in project environment: `uv run command`
+
+## Project Management
+- Use uv for all project management: `uv init myproject`
+- Create standard project structure with:
+  - pyproject.toml - Project configuration
+  - src/ - Source code directory
+  - .venv/ - Virtual environment (created when needed)
+  - uv.lock - Lockfile for dependencies
+- Add dependencies with: `uv add package`
+- Add dev dependencies with: `uv add --dev package`
+- Remove dependencies with: `uv remove package`
+- Update dependencies with: `uv update`
+- Show installed packages with: `uv list`
+
+## Package Management
+- Build packages with: `uv build`
+- Publish to PyPI with: `uv publish`
+- Manage dependencies with uv instead of poetry or pip-tools:
+  - `uv pip compile pyproject.toml -o requirements.txt` to generate requirements
+  - `uv sync` to install dependencies from lockfile (preferred method)
+  - `uv pip sync requirements.txt` as alternative for requirements.txt files
+
+## Python Version Management
+- Install specific Python versions: `uv python install 3.11`
+- List installed Python versions: `uv python list`
+- Pin project to a Python version: `uv python pin 3.11`
+- Create virtual environment with specific Python: `uv venv --python 3.12.0`
+- Use specific Python version: `uv run --python 3.11 script.py`
+
+## Tool Management
+- Run tools in ephemeral environments with: `uvx tool-name` (e.g., `uvx pytest`)
+- Install tools globally with: `uv tool install ruff`
+- List installed tools with: `uv tool list`
+- Uninstall tools with: `uv tool uninstall ruff`
+- Run Python-based tools without installing: `uvx tool-name`
+
+## Pip-Compatible Interface
+- Install packages with: `uv pip install requests`
+- Compile requirements with: `uv pip compile requirements.in --output-file requirements.txt`
+- Sync packages from requirements with: `uv pip sync requirements.txt`
+- Create virtual environment with: `uv venv`
+
+## Scripts Management
+- Add dependencies to scripts with: `uv add --script example.py requests`
+- Run scripts with dependencies with: `uv run example.py`
+- Inline script metadata for dependencies
+
+## Development Workflow
+- Use uv instead of traditional virtual environments: `uv venv`
+- Activate virtual environment: `source .venv/bin/activate` (same as traditional)
+- Install dependencies faster with: `uv sync`
+- Run development tools with: `uv run tool-name` or `uvx tool-name`
+- Manage Python versions for projects: `uv python pin 3.11`
+
+## Dependencies
+- Define dependencies in pyproject.toml
+- Lock dependencies with: `uv lock`
+- Install from lockfile with: `uv sync` (preferred method)
+- Alternative: `uv pip sync requirements.txt` for requirements files
+- Separate dev dependencies in pyproject.toml
+- Add dependencies with: `uv add package`
+- Add dev dependencies with: `uv add --dev package`
+- Update dependencies with: `uv add --upgrade package`
+- Example pyproject.toml structure:
+  ```toml
+  [project]
+  name = "your-package"
+  version = "0.1.0"
+  description = "Your package description"
+  readme = "README.md"
+  requires-python = ">=3.11"
+  license = {text = "MIT"}
+  authors = [
+      {name = "Your Name", email = "your.email@example.com"}
+  ]
+  dependencies = [
+      "flask>=2.3.0",
+      "sqlalchemy>=2.0.0",
+  ]
+
+  [project.optional-dependencies]
+  dev = [
+      "pytest>=8.0.0",
+      "pytest-cov>=4.1.0",
+      "black>=24.0.0",
+      "ruff>=0.5.0",
+      "mypy>=1.9.0",
+  ]
+  
+  [build-system]
+  requires = ["hatchling"]
+  build-backend = "hatchling.build"
+  
+  [tool.uv]
+  # Prevent setuptools version 72.0.0 from being used as a build dependency
+  build-constraint-dependencies = ["setuptools!=72.0.0"]
+  # Declare conflicts between optional extras
+  conflicts = [
+      { extras = ["option1", "option2"], reason = "These options are mutually exclusive" }
+  ]
+  ```
+
+## Configuration
+- Configure UV in pyproject.toml under `[tool.uv]` section
+- Key configuration options:
+  - `build-constraint-dependencies` - Constraints for build dependencies
+  - `conflicts` - Declare mutually exclusive extras
+  - Build isolation settings
+  - Dependency version constraints
+  - Resolution environment limits
+  - Platform-specific settings
+
+## Cache and Directory Structure
+- Virtual environments: `.venv/` in project directory
+- Lockfile: `uv.lock` in project directory
+- Global cache: `~/.cache/uv/` on Linux/macOS, `%LOCALAPPDATA%\uv\cache\` on Windows
+- Python installations: `~/.local/share/uv/python/` on Linux/macOS, `%LOCALAPPDATA%\uv\python\` on Windows
+
+## Performance
+- 10-100x faster than pip for common operations
+- Efficient caching mechanism for packages
+- Optimized dependency resolution algorithm
+- Parallel downloading and installation
+- Written in Rust for optimal performance

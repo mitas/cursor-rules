@@ -20,6 +20,7 @@ globs: **/*.py, src/**/*.py, tests/**/*.py
 - Install specific Python versions: `uv python install 3.11`
 - Use specific Python version: `uv run --python 3.11 script.py`
 - Pin Python version for a project: `uv python pin 3.11`
+- For detailed uv tool usage, see [UV Tool Usage](./uv-tool-usage.mdc)
 
 ## Code Formatting and Linting
 - Format code with Black through uv: `uv run black .`

@@ -2,5 +2,5 @@
 .vscode
 .DS_Store
 
-.cursor/rules/local/*
-!.cursor/rules/local/.gitkeep
+.cursor/rules/*
+!.cursor/rules/.gitkeep

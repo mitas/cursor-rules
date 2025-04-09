@@ -16,16 +16,23 @@ The `apply-rules.sh` script allows you to download rules directly to your projec
 # Download the script
 curl -o apply-rules.sh https://raw.githubusercontent.com/mitas/cursor-rules/master/apply-rules.sh && chmod +x apply-rules.sh
 
-# Basic usage - download rules to target directory
+# Basic usage - download all rules to target directory
 ./apply-rules.sh /path/to/your/project
 
 # Overwrite existing rules
 ./apply-rules.sh --ow /path/to/your/project
+
+# Filter rules by pattern (e.g., only download UV-related rules)
+./apply-rules.sh --filter "uv*" /path/to/your/project
+
+# Filter multiple rule types (e.g., UV and Python rules)
+./apply-rules.sh --filter "uv*|python*" /path/to/your/project
 ```
 
 Parameters:
 
 - `--ow`: Optional flag to overwrite existing rules
+- `--filter PATTERN`: Optional regex pattern to filter which rules to download
 - `<target_directory>`: Required path where rules will be downloaded
 
 After running the script:
@@ -83,6 +90,7 @@ All rules are now stored directly in the `.cursor/rules/` directory using a flat
 - `database.mdc` - Database Best Practices
 - `svelte.mdc` - Svelte Best Practices
 - `typescript.mdc` - TypeScript Best Practices
+- `uv-tool-usage.mdc` - UV Python Package Manager Best Practices
 - `vue.mdc` - Vue.js Best Practices
 
 

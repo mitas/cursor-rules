@@ -13,6 +13,7 @@ RESET="\033[0m"
 # Initialize variables
 OVERWRITE=false
 TARGET_DIR=""
+FILTER=""
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -20,6 +21,14 @@ while [[ $# -gt 0 ]]; do
   --ow)
     OVERWRITE=true
     shift
+    ;;
+  --filter)
+    if [[ -z "$2" || "$2" == --* ]]; then
+      echo -e "${RED}❌ Error: --filter requires a pattern${RESET}"
+      exit 1
+    fi
+    FILTER="$2"
+    shift 2
     ;;
   *)
     if [ -z "$TARGET_DIR" ]; then
@@ -35,8 +44,10 @@ done
 
 # Check if target directory is provided
 if [ -z "$TARGET_DIR" ]; then
-  echo -e "${RED}❌ Usage: $0 [--ow] <target_directory>${RESET}"
+  echo -e "${RED}❌ Usage: $0 [--ow] [--filter PATTERN] <target_directory>${RESET}"
   echo -e "${BLUE}   --ow: Overwrite existing rules${RESET}"
+  echo -e "${BLUE}   --filter: Filter rules by pattern (supports regex)${RESET}"
+  echo -e "${BLUE}            Example: --filter "uv*" or --filter "uv*|python*"${RESET}"
   exit 1
 fi
 
@@ -120,6 +131,7 @@ download_rules() {
     "php.mdc"
     "phpunit-test.mdc"
     "python.mdc"
+    "uv-tool-usage.mdc"
   )
 
   # Count rules
@@ -128,7 +140,18 @@ download_rules() {
 
   # Process each rule file
   for rule in "${RULES[@]}"; do
-    download_file "$rule"
+    # Apply filter if specified
+    if [ -n "$FILTER" ]; then
+      # Use grep instead of bash regex for better wildcard support
+      if echo "$rule" | grep -E "$FILTER" >/dev/null; then
+        download_file "$rule"
+      else
+        echo -e "${GRAY}⏭️ Skipping non-matching rule: $rule${RESET}"
+      fi
+    else
+      # No filter, download all
+      download_file "$rule"
+    fi
   done
 
   echo -e "${GREEN}🚀 All rules downloaded successfully to $RULES_DIR${RESET}"
